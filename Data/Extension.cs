@@ -5,108 +5,121 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-public partial class Extension {
-	[JsonPropertyName ("name")]
-	public string Name { get; set; }
+public partial class Extension
+{
 
-	[JsonPropertyName ("displayName")]
-	public string DisplayName { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 
-	[JsonPropertyName ("description")]
-	public string Description { get; set; }
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; }
 
-	[JsonPropertyName ("icon")]
-	public string Icon { get; set; }
+    [JsonPropertyName("description")]
+    public string Description { get; set; }
 
-	[JsonPropertyName ("version")]
-	public string Version { get; set; }
+    [JsonPropertyName("icon")]
+    public string Icon { get; set; }
 
-	[JsonPropertyName ("preview")]
-	public bool Preview { get; set; }
+    [JsonPropertyName("version")]
+    public string Version { get; set; }
 
-	[JsonPropertyName ("publisher")]
-	public string Publisher { get; set; }
+    [JsonPropertyName("preview")]
+    public bool Preview { get; set; }
 
-	[JsonPropertyName ("author")]
-	public Author Author { get; set; }
+    [JsonPropertyName("publisher")]
+    public string Publisher { get; set; }
 
-	[JsonPropertyName ("galleryBanner")]
-	public GalleryBanner GalleryBanner { get; set; }
+    [JsonPropertyName("author")]
+    public Author Author { get; set; }
 
-	[JsonPropertyName ("qna")]
-	public Uri Qna { get; set; }
+    [JsonPropertyName("galleryBanner")]
+    public GalleryBanner GalleryBanner { get; set; }
 
-	[JsonPropertyName ("license")]
-	public string License { get; set; }
+    [JsonPropertyName("qna")]
+    public Uri Qna { get; set; }
 
-	[JsonPropertyName ("homepage")]
-	public Uri Homepage { get; set; }
+    [JsonPropertyName("license")]
+    public string License { get; set; }
 
-	[JsonPropertyName ("repository")]
-	public Repository Repository { get; set; }
+    [JsonPropertyName("homepage")]
+    public Uri Homepage { get; set; }
 
-	[JsonPropertyName ("bugs")]
-	public Bugs Bugs { get; set; }
+    [JsonPropertyName("repository")]
+    public Repository Repository { get; set; }
 
-	[JsonPropertyName ("engines")]
-	public Engines Engines { get; set; }
+    [JsonPropertyName("bugs")]
+    public Bugs Bugs { get; set; }
 
-	[JsonPropertyName ("categories")]
-	public string [] Categories { get; set; }
+    [JsonPropertyName("engines")]
+    public Engines Engines { get; set; }
 
-	[JsonPropertyName ("keywords")]
-	public string [] Keywords { get; set; }
+    [JsonPropertyName("categories")]
+    public string[] Categories { get; set; }
+
+    [JsonPropertyName("keywords")]
+    public string[] Keywords { get; set; }
+
+    public string Identifier => $"{Publisher}.{Name}";
 }
 
-public partial class Author {
-	[JsonPropertyName ("name")]
-	public string Name { get; set; }
+public partial class Author
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 
-	[JsonPropertyName ("email")]
-	public string Email { get; set; }
+    [JsonPropertyName("email")]
+    public string Email { get; set; }
 }
 
-public partial class Bugs {
-	[JsonPropertyName ("url")]
-	public Uri Url { get; set; }
+public partial class Bugs
+{
+    [JsonPropertyName("url")]
+    public Uri Url { get; set; }
 }
 
-public partial class Engines {
-	[JsonPropertyName ("vscode")]
-	public string VSCodeEngine { get; set; }
+public partial class Engines
+{
+    [JsonPropertyName("vscode")]
+    public string VSCodeEngine { get; set; }
 }
 
-public partial class GalleryBanner {
-	[JsonPropertyName ("theme")]
-	public string Theme { get; set; }
+public partial class GalleryBanner
+{
+    [JsonPropertyName("theme")]
+    public string Theme { get; set; }
 
-	[JsonPropertyName ("color")]
-	public string Color { get; set; }
+    [JsonPropertyName("color")]
+    public string Color { get; set; }
 }
 
-public partial class Repository {
-	[JsonPropertyName ("type")]
-	public string Type { get; set; }
+public partial class Repository
+{
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
 
-	[JsonPropertyName ("url")]
-	public Uri Url { get; set; }
+    [JsonPropertyName("url")]
+    public Uri Url { get; set; }
 }
 
-public partial class Extension {
-	public static Extension FromJson (string json) => JsonSerializer.Deserialize<Extension> (json, Converter.Settings);
+public partial class Extension
+{
+    public static Extension FromJson(string json) => JsonSerializer.Deserialize<Extension>(json, Converter.Settings);
 }
 
-public static class Serialize {
-	public static string ToJson (this Extension self) => JsonSerializer.Serialize (self, Converter.Settings);
+public static class Serialize
+{
+    public static string ToJson(this Extension self) => JsonSerializer.Serialize(self, Converter.Settings);
 }
 
-internal static class Converter {
-	public static readonly JsonSerializerOptions Settings = new (JsonSerializerDefaults.General) {
-		Converters =
-	    {
+internal static class Converter
+{
+    public static readonly JsonSerializerOptions Settings = new(JsonSerializerDefaults.General)
+    {
+        Converters =
+        {
 
-	    },
-	};
+        },
+    };
 }
 
 #pragma warning restore CS8618
