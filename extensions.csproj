@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+		<PackageReference Include="Spectre.Console" Version="0.46.0" />
+		<PackageReference Include="Spectre.Console.cli" Version="0.46.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="Spectre.Console.Cli" />
+		<Using Include="Spectre.Console" />
+		<Using Include="System.ComponentModel" />
+		<Using Include="System.Diagnostics.CodeAnalysis" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="Data\" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Data\" />
+	</ItemGroup>
+</Project>
