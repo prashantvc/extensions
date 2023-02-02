@@ -10,6 +10,7 @@
 		<WarningLevel>4</WarningLevel>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="LiteDB" Version="5.0.15" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 		<PackageReference Include="Spectre.Console" Version="0.46.0" />
 		<PackageReference Include="Spectre.Console.cli" Version="0.46.0" />
