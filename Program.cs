@@ -3,7 +3,7 @@
     public static async Task<int> Main(string[] args)
     {
         // Run app as web app
-        if (args[0] == "run")
+        if (args.Length > 1 && args[0] == "run")
         {
             var builder = WebApplication.CreateBuilder(args);
 
