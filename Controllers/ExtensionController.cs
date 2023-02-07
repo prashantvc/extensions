@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 public class ExtensionController : ControllerBase
 {
+    [HttpGet()]
     public List<Extension> GetExtensions()
     {
         var exts = _databaseService.Extensions
