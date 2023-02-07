@@ -1,4 +1,6 @@
+using Semver;
 internal sealed class AddExtensionFileCommand : AsyncCommand<AddExtensionFileCommand.Settings>
+
 {
     public sealed class Settings : CommandSettings
     {
@@ -21,10 +23,23 @@ internal sealed class AddExtensionFileCommand : AsyncCommand<AddExtensionFileCom
         ZipService.Instance.ExtractPackage(filePath);
         var ext = await ExtensionService.Instance.GetExtension(fileName);
 
-        DatabaseService.Instance.InsertExtension(ext);
+        bool success = ValidateVersion(ext);
+        if (!success)
+        {
+            AnsiConsole.MarkupLine($"Version validation failed!");
+            return -99;
+        }
+
+        //DatabaseService.Instance.InsertExtension(ext);
 
         AnsiConsole.MarkupLine($"Extension name: [green]{ext.DisplayName} [/]");
-
         return 0;
+    }
+
+    bool ValidateVersion(Extension ext)
+    {
+        bool success = SemVersion.TryParse(ext.Version, SemVersionStyles.Strict, out var version);
+        ext.IsPreRelease = version.IsPrerelease;
+        return success;
     }
 }

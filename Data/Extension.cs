@@ -60,6 +60,8 @@ public partial class Extension
     public string[] Keywords { get; set; }
 
     public string Identifier => $"{Publisher}.{Name}";
+
+    public bool IsPreRelease { get; set; }
 }
 
 public partial class Author
