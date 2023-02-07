@@ -1,10 +1,18 @@
 ﻿
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.Configure<LiteDbOptions>(builder.Configuration.GetSection("LiteDbOptions"));
+builder.Services.Configure<FormOptions>(p =>
+{
+    p.ValueLengthLimit = int.MaxValue;
+    p.MultipartBodyLengthLimit = int.MaxValue;
+    p.MemoryBufferThreshold = int.MaxValue;
+});
+
 builder.Services.AddSingleton<ILiteDbContext, LiteDbContext>();
 builder.Services.AddTransient<IDatabaseService, DatabaseService>();
 
