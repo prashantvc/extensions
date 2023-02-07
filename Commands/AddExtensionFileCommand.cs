@@ -30,7 +30,7 @@ internal sealed class AddExtensionFileCommand : AsyncCommand<AddExtensionFileCom
             return -99;
         }
 
-        //DatabaseService.Instance.InsertExtension(ext);
+        DatabaseService.Instance.InsertExtension(ext);
 
         AnsiConsole.MarkupLine($"Extension name: [green]{ext.DisplayName} [/]");
         return 0;

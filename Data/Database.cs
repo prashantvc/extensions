@@ -12,7 +12,7 @@ public class DatabaseService
     public static DatabaseService Instance => _instance ??= new DatabaseService();
     private DatabaseService()
     {
-        database = new LiteDatabase("Extensions.db");
+        database = new LiteDatabase("ExtensionsDatabase.db");
 
     }
     static DatabaseService? _instance;
