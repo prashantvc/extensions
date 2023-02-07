@@ -17,5 +17,5 @@ public class LiteDbContext : ILiteDbContext
 
 public class LiteDbOptions
 {
-    public string DatabaseLocation { get; set; } = string.Empty;
+    public string DatabaseLocation { get; set; }
 }

@@ -1,6 +1,6 @@
 using LiteDB;
 
-public class DatabaseService
+public class DatabaseService : IDatabaseService
 {
     public void InsertExtension(Extension extension)
     {
@@ -8,13 +8,13 @@ public class DatabaseService
     }
 
     public ILiteCollection<Extension> Extensions =>
-        database.GetCollection<Extension>("extensions");
-    public static DatabaseService Instance => _instance ??= new DatabaseService();
-    private DatabaseService()
+        _database.GetCollection<Extension>("extensions");
+ 
+     public DatabaseService(ILiteDbContext liteDbContext)
     {
-        database = new LiteDatabase("ExtensionsDatabase.db");
+        _database = liteDbContext.Database;
 
     }
-    static DatabaseService? _instance;
-    readonly LiteDatabase database;
+    
+    readonly LiteDatabase _database;
 }
