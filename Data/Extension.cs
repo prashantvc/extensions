@@ -59,6 +59,9 @@ public partial class Extension
     [JsonPropertyName("keywords")]
     public string[] Keywords { get; set; }
 
+    /// <summary>
+    /// Extension Identifier - {Publisher}.{Name}
+    /// </summary>
     public string Identifier => $"{Publisher}.{Name}";
 
     public bool IsPreRelease { get; set; }
