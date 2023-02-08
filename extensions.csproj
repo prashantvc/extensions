@@ -26,8 +26,6 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Using Include="Spectre.Console.Cli" />
-		<Using Include="Spectre.Console" />
 		<Using Include="System.ComponentModel" />
 		<Using Include="System.Diagnostics.CodeAnalysis" />
 	</ItemGroup>
