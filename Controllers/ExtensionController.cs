@@ -6,18 +6,18 @@ using Semver;
 public class ExtensionController : ControllerBase
 {
     [HttpGet()]
-    public IActionResult GetExtensions()
+    public IActionResult GetExtensions(bool prerelease = false)
     {
-        var exts = _databaseService.Extensions
-                    .Query()
-                    .ToList();
+        var extensions = _databaseService.Extensions;
+        var extensionsList =
+          prerelease ?
+            extensions.Query().ToList() :
+            extensions.Find(p => !p.IsPreRelease).ToList();
 
-        if (exts.Count <= 0)
-        {
+        if (extensionsList.Count <= 0)
             return NoContent();
-        }
 
-        return Ok(exts);
+        return Ok(extensionsList);
     }
 
     [HttpGet]
