@@ -1,26 +1,23 @@
 ﻿
 using System.Diagnostics;
 
-public class ExtensionService {
+public class ExtensionService : IExtensionService
+{
+    public async Task<Extension> GetExtensionAsync([NotNull] string extensionName)
+    {
+        string extensionPath
+            = $"./output/{extensionName}/extension";
 
-	public async Task<Extension> GetExtension ([NotNull] string extensionName)
-	{
-		string extensionPath
-			= $"./output/{extensionName}/extension";
+        string packageFile = Path.Combine(extensionPath, "package.json");
+        Debug.WriteLine($"Package Path: {packageFile}");
 
-		string packageFile = Path.Combine (extensionPath, "package.json");
-		Debug.WriteLine ($"Package Path: {packageFile}");
+        var data = await File.ReadAllTextAsync(packageFile);
 
-		var data = await File.ReadAllTextAsync (packageFile);
-
-		return Extension.FromJson (data);
-	}
-
-	public static ExtensionService Instance => _instance ??= new ExtensionService ();
-
-	private ExtensionService () { }
-	static ExtensionService? _instance;
-
+        return Extension.FromJson(data);
+    }
 }
 
-
+public interface IExtensionService
+{
+    public Task<Extension> GetExtensionAsync(string extensionName);
+}

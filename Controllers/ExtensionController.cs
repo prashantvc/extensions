@@ -47,7 +47,7 @@ public class ExtensionController : ControllerBase
 
         //Make it singleton
         string fileName = Path.GetFileNameWithoutExtension(filePath);
-        var ext = await ExtensionService.Instance.GetExtension(fileName);
+        var ext = await _extensionService.GetExtensionAsync(fileName);
 
         bool success = ValidateVersion(ext);
         if (!success)
@@ -69,9 +69,12 @@ public class ExtensionController : ControllerBase
         return success;
     }
 
-    public ExtensionController([NotNull] IDatabaseService databaseService)
+    public ExtensionController([NotNull] IDatabaseService databaseService, 
+        [NotNull] IExtensionService extensionService)
     {
         _databaseService = databaseService;
+        _extensionService = extensionService;
     }
     readonly IDatabaseService _databaseService;
+    readonly IExtensionService _extensionService;
 }
