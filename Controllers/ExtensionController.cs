@@ -35,6 +35,9 @@ public class ExtensionController : ControllerBase
             return BadRequest("Extension file path is empty");
 
         string uploadLocation = Path.Combine("./uploads", filePath);
+         if(!System.IO.Directory.Exists(uploadLocation)){
+            System.IO.Directory.CreateDirectory("./uploads");
+         }
         using (var fileStream = new FileStream(uploadLocation, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
