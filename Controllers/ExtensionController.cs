@@ -20,26 +20,25 @@ public class ExtensionController : ControllerBase
         return Ok(exts);
     }
 
-    [HttpGet("{id}/{version?}")]
-    [HttpGet("{id}/prerelease")]
-    public IActionResult GetExtension(string id, string version = "")
+    [HttpGet]
+    [Route("{id}/{version?}")]
+    public IActionResult GetExtension(string id, string version = "", bool prerelease = false)
     {
         string latestVersion = version;
         if (string.IsNullOrWhiteSpace(latestVersion))
         {
-            bool isPrerelease = this.Request.Path.Value.Contains("prerelease");
-            var v = _databaseService.Extensions
+            SemVersion? ver = _databaseService.Extensions
                 .Find(p => p.Identifier == id)
                 .Select(p => SemVersion.Parse(p.Version, SemVersionStyles.Strict))
                 .OrderDescending()
-                .FirstOrDefault(p => p.IsPrerelease == isPrerelease);
+                .FirstOrDefault(p => p.IsPrerelease == prerelease);
 
-            if (v == null)
+            if (ver == null)
             {
-                return BadRequest();
+                return NoContent();
             }
 
-            latestVersion = v.ToString();
+            latestVersion = ver.ToString();
         }
         var extension = _databaseService.Extensions
             .FindOne(p => p.Identifier == id && p.Version == latestVersion);
