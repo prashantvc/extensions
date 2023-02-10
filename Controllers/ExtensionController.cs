@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Semver;
+using System.Diagnostics.Eventing.Reader;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -50,39 +51,44 @@ public class ExtensionController : ControllerBase
     {
         string filePath = file.FileName;
 
-        if (string.IsNullOrWhiteSpace(filePath))
-            return BadRequest("Extension file path is empty");
+        if(!IsExtensionAllowed(filePath))
+            return BadRequest("Bad extension");
 
-        string uploadLocation = Path.Combine("./uploads", filePath);
-        if (!System.IO.Directory.Exists(uploadLocation))
+        string uploadLocation = Path.Combine(UploadDirectory, filePath);
+        if (!Directory.Exists(uploadLocation))
         {
-            System.IO.Directory.CreateDirectory("./uploads");
+            Directory.CreateDirectory(UploadDirectory);
         }
         using (var fileStream = new FileStream(uploadLocation, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
 
-        string destination = Path.Combine("./output", filePath);
+        string destination = Path.Combine(OutputDirectory, filePath);
 
         ZipService.Instance.ExtractPackage(uploadLocation);
         System.IO.File.Move(uploadLocation, destination, true);
 
-        //Make it singleton
+        
         string fileName = Path.GetFileNameWithoutExtension(filePath);
         var ext = await _extensionService.GetExtensionAsync(fileName);
 
         bool success = ValidateVersion(ext);
         if (!success)
-        {
             return BadRequest($"Version validation failed!");
-        }
 
         _databaseService.Extensions.Insert(ext);
 
-        System.Console.WriteLine($"Extension name: {ext.DisplayName}");
+        Console.WriteLine($"Extension name: {ext.DisplayName}");
 
         return Created($"/{ext.Identifier}", ext);
+
+        static bool IsExtensionAllowed(string fileName)
+        {
+            string permittedExtension = ".vsix";
+            string fileExtension = Path.GetExtension(fileName).ToLower();
+            return !string.IsNullOrWhiteSpace(fileExtension) && permittedExtension == fileExtension;
+        }
     }
 
     bool ValidateVersion(Extension ext)
@@ -100,4 +106,7 @@ public class ExtensionController : ControllerBase
     }
     readonly IDatabaseService _databaseService;
     readonly IExtensionService _extensionService;
+
+    const string UploadDirectory = "./uploads";
+    const string OutputDirectory = "./output";
 }
