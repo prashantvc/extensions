@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Semver;
-using System.Diagnostics.Eventing.Reader;
+using System.Diagnostics.CodeAnalysis;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -51,7 +51,7 @@ public class ExtensionController : ControllerBase
     {
         string filePath = file.FileName;
 
-        if(!IsExtensionAllowed(filePath))
+        if (!IsExtensionAllowed(filePath))
             return BadRequest("Bad extension");
 
         string uploadLocation = Path.Combine(UploadDirectory, filePath);
@@ -69,7 +69,7 @@ public class ExtensionController : ControllerBase
         ZipService.Instance.ExtractPackage(uploadLocation);
         System.IO.File.Move(uploadLocation, destination, true);
 
-        
+
         string fileName = Path.GetFileNameWithoutExtension(filePath);
         var ext = await _extensionService.GetExtensionAsync(fileName);
 
