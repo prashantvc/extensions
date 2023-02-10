@@ -1,8 +1,8 @@
-﻿
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRazorPages();
+builder.Services.AddControllers();
 
 // Add services to the container.
 builder.Services.Configure<LiteDbOptions>(builder.Configuration.GetSection("LiteDbOptions"));
@@ -17,47 +17,21 @@ builder.Services.AddSingleton<IExtensionService, ExtensionService>();
 builder.Services.AddSingleton<ILiteDbContext, LiteDbContext>();
 builder.Services.AddTransient<IDatabaseService, DatabaseService>();
 
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Version = "v0.0.1",
-        Title = "Extensions",
-        Description = "Extension Repository for VS Code",
-        TermsOfService = new Uri("https://prashantvc.com"),
-        Contact = new OpenApiContact
-        {
-            Name = "Prashant Cholachagudda",
-            Url = new Uri("https://prashantvc.com")
-        },
-        License = new OpenApiLicense
-        {
-            Name = "License",
-            Url = new Uri("https://prashantvc.com")
-        }
-    });
-});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-        {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-            options.RoutePrefix = string.Empty;
-        });
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseAuthorization();
+app.UseRouting();
 
-app.MapControllers();
-
+app.MapRazorPages();
 app.Run();
