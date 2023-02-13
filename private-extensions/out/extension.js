@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
+const privateExtensionProvider_1 = require("./privateExtensionProvider");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
+    const extensionDataProvider = new privateExtensionProvider_1.PrivateExtensionProvider();
+    vscode.window.registerTreeDataProvider("private-extensions", extensionDataProvider);
     let addSource = vscode.commands.registerCommand("private-extensions.addSource", async () => {
         vscode.window
             .showInputBox({
@@ -21,6 +22,7 @@ function activate(context) {
             }
         });
     });
+    vscode.commands.registerCommand("private-extensions.refresh", () => extensionDataProvider.refresh());
     context.subscriptions.push(addSource);
 }
 exports.activate = activate;

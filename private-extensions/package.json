@@ -16,49 +16,71 @@
     "contributes": {
         "commands": [
             {
-                "command": "private-extensions.helloWorld",
-                "title": "Hello World"
+                "command": "private-extensions.refresh",
+                "title": "Refresh Extension List",
+                "icon": {
+                    "light": "icons/light/refresh.svg",
+                    "dark": "icons/dark/refresh.svg"
+                }
             },
             {
                 "command": "private-extensions.addSource",
-                "title": "Add Repository Source"
+                "title": "Add Repository Source",
+                "icon": {
+                    "light": "icons/light/folder.svg",
+                    "dark": "icons/dark/folder.svg"
+                }
             }
         ],
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "privateExtensions",
+                    "id": "private-extension-activitybar",
                     "title": "Private Extensions",
                     "icon": "icons/terminal.svg"
                 }
             ]
         },
         "views": {
-            "privateExtensions": [
+            "private-extension-activitybar": [
                 {
                     "id": "private-extensions",
-                    "name": "Extensions"
+                    "name": "Repository"
                 }
             ]
         },
         "viewsWelcome": [
             {
                 "view": "private-extensions",
-                "contents": "Hello configure your extension repository.  \n[Open Folder](command:private-extensions.addSource)"
+                "contents": "Hello configure your extension repository.  \n[Add Source](command:private-extensions.addSource)"
             }
         ],
-        "configuration":[
+        "configuration": [
             {
                 "title": "Repository Sources",
                 "properties": {
-                    "privateExtensions.Source":{
-                        "type":"array",
+                    "privateExtensions.Source": {
+                        "type": "array",
                         "order": 0,
                         "description": "This is the list of extensions"
                     }
                 }
             }
-        ]
+        ],
+        "menus": {
+            "view/title": [
+                {
+                    "command": "private-extensions.addSource",
+                    "when": "view == private-extensions",
+                    "group": "navigation"
+                },
+                {
+                    "command": "private-extensions.refresh",
+                    "when": "view == private-extensions",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "yarn run compile",
@@ -69,16 +91,19 @@
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
-        "@types/vscode": "^1.75.0",
         "@types/glob": "^8.0.0",
         "@types/mocha": "^10.0.1",
         "@types/node": "16.x",
+        "@types/vscode": "^1.75.0",
         "@typescript-eslint/eslint-plugin": "^5.45.0",
         "@typescript-eslint/parser": "^5.45.0",
+        "@vscode/test-electron": "^2.2.0",
         "eslint": "^8.28.0",
         "glob": "^8.0.3",
         "mocha": "^10.1.0",
-        "typescript": "^4.9.3",
-        "@vscode/test-electron": "^2.2.0"
+        "typescript": "^4.9.3"
+    },
+    "dependencies": {
+        "axios": "^1.3.2"
     }
 }
