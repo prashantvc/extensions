@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "bin/Release/net7.0/publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/d6dd2be4-6cc7-443a-a92d-e302888760ab/AppServices/subscriptions/d6dd2be4-6cc7-443a-a92d-e302888760ab/resourceGroups/appsvc_windows_centralus/providers/Microsoft.Web/sites/private-extensions"
+}
