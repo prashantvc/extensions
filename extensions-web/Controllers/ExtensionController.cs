@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Semver;
 using System.Diagnostics.CodeAnalysis;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class ExtensionController : ControllerBase
 {
