@@ -10,3 +10,13 @@ The main objectives of this project are:
 4. **Access control**: The repository comes with built-in access control, authentication, and authorization mechanisms, allowing you to control who can upload, download, and manage the extensions in the repository.
 
 With private extension repository, you can ensure that your extensions are secure and managed in a controlled environment. This can be particularly useful for enterprises and teams that need to maintain a certain level of control over the extensions they use.
+
+## Instruction
+
+1. Fork the repository
+2. Switch to `react-client` branch
+3. Run `npm i`
+4. Finally, `dotnet run`
+
+# Screenshot
+<img width="937" alt="Screenshot 2023-03-22 at 00 16 30" src="https://user-images.githubusercontent.com/328076/226710996-c9169856-f1a9-4f86-ad27-313ccaa922f8.png">
