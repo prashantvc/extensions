@@ -1,10 +1,8 @@
-import { Avatar, List } from "antd";
+import { Avatar, Badge, List, Space } from "antd";
 import React from "react";
-import { UploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { Button, message, Upload } from 'antd';
-
-
+import { GithubOutlined, UploadOutlined } from '@ant-design/icons';
 
 export class Extensions extends React.Component<
     {},
@@ -40,13 +38,32 @@ export class Extensions extends React.Component<
                 <Upload {...this.uploadProp}>
                     <Button icon={<UploadOutlined />}>Upload Extension</Button>
                 </Upload>
+                <br />
                 <List itemLayout="horizontal"
                     dataSource={this.state.extensions}
                     renderItem={(item, index) => (
-                        <List.Item>
+                        <List.Item
+                            actions={[
+                                <Space>
+                                    <GithubOutlined />
+                                </Space>
+                            ]}
+                        >
                             <List.Item.Meta
-                                avatar={<Avatar shape="square" size="large" src={`https://joesch.moe/api/v1/random?key=${index}`} />}
-                                title={item.displayName}
+                                avatar={<Avatar shape="square" size="large" />}
+                                title={
+                                    <Space>
+                                        
+                                            {item.displayName}
+                                        
+                                        <Badge
+                                            className="site-badge-count-109"
+                                            count={item.version}
+                                            style={{ backgroundColor: '#52c41a' }}
+                                        />
+                                    </Space>
+
+                                }
                                 description={item.description}
                             />
                         </List.Item>
