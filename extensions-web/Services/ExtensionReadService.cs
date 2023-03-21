@@ -13,8 +13,16 @@ public class ExtensionService : IExtensionService
         Debug.WriteLine($"Package Path: {packageFile}");
 
         var data = await File.ReadAllTextAsync(packageFile);
-
-        return Extension.FromJson(data);
+        try
+        {
+            var ext =  Extension.FromJson(data);
+            return ext;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public ExtensionService(IWebHostEnvironment environment)

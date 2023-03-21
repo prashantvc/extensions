@@ -111,7 +111,7 @@ public class ExtensionController : ControllerBase
     string CreateOrGetOutputDirectory()
     {
         string outputDirectory = "output";
-        outputDirectory = Path.Combine(_environment.ContentRootPath, outputDirectory);
+        outputDirectory = Path.Combine(_environment.ContentRootPath, "ClientApp/public", outputDirectory);
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
