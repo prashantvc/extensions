@@ -2,7 +2,7 @@ import { Avatar, Badge, List, Space } from "antd";
 import React from "react";
 import type { UploadProps } from 'antd';
 import { Button, message, Upload, Typography } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Extension } from "../data/extension";
 import { UploadChangeParam } from "antd/es/upload/interface";
 
@@ -40,10 +40,13 @@ export class Extensions extends React.Component<
                     <Button icon={<UploadOutlined />}>Upload Extension</Button>
                 </Upload>
                 <br />
-                <List itemLayout="horizontal"
+                <List itemLayout="horizontal" 
                     dataSource={this.state.extensions}
                     renderItem={(item, index) => (
-                        <List.Item>
+                        <List.Item
+                        actions={[
+                            <Button type="primary" href={`output/${item.identifier}-${item.version}.vsix`}>Download</Button>
+                        ]}>
                             <List.Item.Meta
                                 avatar={
                                     <Avatar shape="square" size="large" src={`output/${item.identifier}-${item.version}/${item.icon}`}/>
