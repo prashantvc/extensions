@@ -29,8 +29,33 @@ public partial class Extension
     [JsonPropertyName("publisher")]
     public string Publisher { get; set; }
 
+    private Dictionary<string, object> _author;
+
     [JsonPropertyName("author")]
-    public Author Author { get; set; }
+    public object Author 
+    {
+        get { return _author != null ? (object)_author : (object)AuthorName; }
+        set 
+        {
+            switch (value)
+            {
+                case Dictionary<string, object> author:
+                    _author = author;
+                    break;
+                case JsonElement authorName:
+                    AuthorName = authorName.ToString();
+                    break;
+                case string an:
+                    AuthorName = an;
+                    break;
+                default:
+                    throw new ArgumentException("Author must be an Author object or a string.");
+            }
+        }
+    }
+
+    [JsonIgnore]
+    public string AuthorName { get; set; }
 
     [JsonPropertyName("galleryBanner")]
     public GalleryBanner GalleryBanner { get; set; }
@@ -74,6 +99,11 @@ public partial class Author
 
     [JsonPropertyName("email")]
     public string Email { get; set; }
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }
 
 public partial class Bugs
