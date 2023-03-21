@@ -15,6 +15,8 @@ public class ExtensionController : ControllerBase
             extensions.Query().ToList() :
             extensions.Find(p => !p.IsPreRelease).ToList();
 
+        _logger.LogInformation($"Number of Extensions {extensionsList.Count}");
+
         if (extensionsList.Count <= 0)
             return NoContent();
 
@@ -98,15 +100,21 @@ public class ExtensionController : ControllerBase
         return success;
     }
 
-    public ExtensionController([NotNull] IDatabaseService databaseService,
-        [NotNull] IExtensionService extensionService)
+    public ExtensionController(
+        [NotNull] IDatabaseService databaseService,
+        [NotNull] IExtensionService extensionService,
+        [NotNull] ILogger<ExtensionController> logger)
     {
         _databaseService = databaseService;
         _extensionService = extensionService;
+        _logger = logger;
     }
     readonly IDatabaseService _databaseService;
     readonly IExtensionService _extensionService;
 
     const string UploadDirectory = "./uploads";
     const string OutputDirectory = "./output";
+
+    private readonly ILogger<ExtensionController> _logger;
+
 }
