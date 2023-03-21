@@ -1,4 +1,7 @@
+import { Button, Avatar, List } from "antd";
 import React from "react";
+
+
 
 export class Extensions extends React.Component<
     {},
@@ -14,10 +17,19 @@ export class Extensions extends React.Component<
 
     public render() {
         return (
-            <div>
-                <h1>Extensions</h1>
-                <p>Number of extensions {this.state.extensions.length}</p>
-            </div>
+            <List itemLayout="horizontal"
+                dataSource={this.state.extensions}
+                renderItem={(item, index) => (
+                    <List.Item>
+                        <List.Item.Meta
+                            avatar={<Avatar shape="square" size="large" src={`https://joesch.moe/api/v1/random?key=${index}`} />}
+                            title={item.displayName}
+                            description={item.description}
+                        />
+                    </List.Item>
+
+                )}
+            />
         );
     }
 
@@ -29,7 +41,6 @@ export class Extensions extends React.Component<
         console.log("Populating extensions");
         const response = await fetch("extension");
         const extensionData = await response.json();
-        console.log("Extensions: ", extensionData.length);
         this.setState({ extensions: extensionData, loading: false });
     }
 }
