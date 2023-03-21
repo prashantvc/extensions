@@ -1,3 +1,5 @@
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
 using System.Diagnostics.CodeAnalysis;
@@ -52,36 +54,34 @@ public class ExtensionController : ControllerBase
     public async Task<IActionResult> AddExtensionsAsync(IFormFile file)
     {
         string filePath = file.FileName;
-
         if (!IsExtensionAllowed(filePath))
             return BadRequest("Bad extension");
 
-        string uploadLocation = Path.Combine(UploadDirectory, filePath);
-        if (!Directory.Exists(uploadLocation))
-        {
-            Directory.CreateDirectory(UploadDirectory);
-        }
-        using (var fileStream = new FileStream(uploadLocation, FileMode.Create))
+        string uploadDirectory = CreateOrGetUloadDirectory();
+
+        string fileOnServer = Path.Combine(uploadDirectory, filePath);
+        using (var fileStream = new FileStream(fileOnServer, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
 
-        string destination = Path.Combine(OutputDirectory, filePath);
+        string outputDirectory = CreateOrGetOutputDirectory();
+        string destination = Path.Combine(outputDirectory, filePath);
 
-        ZipService.Instance.ExtractPackage(uploadLocation);
-        System.IO.File.Move(uploadLocation, destination, true);
-
+        ExtractFiles(fileOnServer, outputDirectory);
 
         string fileName = Path.GetFileNameWithoutExtension(filePath);
         var ext = await _extensionService.GetExtensionAsync(fileName);
 
-        bool success = ValidateVersion(ext);
-        if (!success)
-            return BadRequest($"Version validation failed!");
-
         _databaseService.Extensions.Insert(ext);
 
-        Console.WriteLine($"Extension name: {ext.DisplayName}");
+        System.IO.File.Move(fileOnServer, destination, true);
+
+        bool success = ValidateVersion(ext);
+        if (!success)
+        {
+            return BadRequest($"Version validation failed!");
+        }
 
         return Created($"/{ext.Identifier}", ext);
 
@@ -93,6 +93,28 @@ public class ExtensionController : ControllerBase
         }
     }
 
+    string CreateOrGetUloadDirectory()
+    {
+        UploadDirectory = Path.Combine(_environment.ContentRootPath, UploadDirectory);
+        if (!Directory.Exists(UploadDirectory))
+        {
+            Directory.CreateDirectory(UploadDirectory);
+        }
+
+        return UploadDirectory;
+    }
+
+    string CreateOrGetOutputDirectory()
+    {
+        OutputDirectory = Path.Combine(_environment.ContentRootPath, OutputDirectory);
+        if (!Directory.Exists(OutputDirectory))
+        {
+            Directory.CreateDirectory(OutputDirectory);
+        }
+
+        return OutputDirectory;
+    }
+
     bool ValidateVersion(Extension ext)
     {
         bool success = SemVersion.TryParse(ext.Version, SemVersionStyles.Strict, out var version);
@@ -100,21 +122,56 @@ public class ExtensionController : ControllerBase
         return success;
     }
 
+
+    public void ExtractFiles(string archiveFilePath, string destinationFolderPath)
+    {
+        using (var fileStream = new FileStream(archiveFilePath, FileMode.Open, FileAccess.Read))
+        using (var zipFile = new ZipFile(fileStream))
+        {
+            // Find the package.json entry in the archive
+            var packageJsonEntry = zipFile.GetEntry("extension/package.json");
+            if (packageJsonEntry == null)
+            {
+                throw new FileNotFoundException("Could not find package.json in the archive.");
+            }
+
+            // Extract the package.json entry to the destination folder
+            string destinationFolder = Path.GetFileNameWithoutExtension(archiveFilePath);
+            var destinationFilePath = Path.Combine(destinationFolderPath, destinationFolder, "extension/package.json");
+            var directoryName = Path.GetDirectoryName(destinationFilePath);
+            if (!Directory.Exists(directoryName))
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+            using (var outputStream = new FileStream(destinationFilePath, FileMode.Create))
+            using (var zipStream = zipFile.GetInputStream(packageJsonEntry))
+            {
+                // Use SharpZipLib's CopyStream method to copy the contents of the package.json entry to the output stream
+                // This will extract the file from the archive and save it to the destination folder
+                byte[] buffer = new byte[4096];
+                StreamUtils.Copy(zipStream, outputStream, buffer);
+            }
+        }
+    }
+
+
     public ExtensionController(
         [NotNull] IDatabaseService databaseService,
         [NotNull] IExtensionService extensionService,
-        [NotNull] ILogger<ExtensionController> logger)
+        [NotNull] ILogger<ExtensionController> logger,
+        IWebHostEnvironment environment)
     {
         _databaseService = databaseService;
         _extensionService = extensionService;
         _logger = logger;
+        _environment = environment;
     }
     readonly IDatabaseService _databaseService;
     readonly IExtensionService _extensionService;
 
-    const string UploadDirectory = "./uploads";
-    const string OutputDirectory = "./output";
+    string UploadDirectory = "uploads";
+    string OutputDirectory = "output";
 
     private readonly ILogger<ExtensionController> _logger;
-
+    private readonly IWebHostEnvironment _environment;
 }
