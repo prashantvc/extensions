@@ -1,13 +1,16 @@
 import { Avatar, Badge, List, Space } from "antd";
 import React from "react";
 import type { UploadProps } from 'antd';
-import { Button, message, Upload } from 'antd';
-import { GithubOutlined, UploadOutlined } from '@ant-design/icons';
+import { Button, message, Upload, Typography } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Extension } from "../data/extension";
+
+const { Text } = Typography;
 
 export class Extensions extends React.Component<
     {},
     {
-        extensions: any[];
+        extensions: Extension[];
         loading: boolean;
     }
 > {
@@ -42,20 +45,13 @@ export class Extensions extends React.Component<
                 <List itemLayout="horizontal"
                     dataSource={this.state.extensions}
                     renderItem={(item, index) => (
-                        <List.Item
-                            actions={[
-                                <Space>
-                                    <GithubOutlined />
-                                </Space>
-                            ]}
-                        >
+                        <List.Item>
                             <List.Item.Meta
                                 avatar={<Avatar shape="square" size="large" />}
                                 title={
                                     <Space>
-                                        
-                                            {item.displayName}
-                                        
+                                        {item.displayName}
+                                        <Text type="secondary">{item.identifier}</Text>
                                         <Badge
                                             className="site-badge-count-109"
                                             count={item.version}
