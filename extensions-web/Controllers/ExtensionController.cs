@@ -68,14 +68,17 @@ public class ExtensionController : ControllerBase
         string outputDirectory = CreateOrGetOutputDirectory();
         string destination = Path.Combine(outputDirectory, filePath);
 
-        ExtractFiles(fileOnServer, outputDirectory);
+        ExtractFiles(fileOnServer, outputDirectory, "package.json");
 
         string fileName = Path.GetFileNameWithoutExtension(filePath);
         var ext = await _extensionService.GetExtensionAsync(fileName);
-
-        _databaseService.Extensions.Insert(ext);
+        
+        //Extract metadata
+        ExtractFiles(fileOnServer, outputDirectory, ext.Icon, "README.MD", "LICENSE.txt");
 
         System.IO.File.Move(fileOnServer, destination, true);
+
+        _databaseService.Extensions.Insert(ext);
 
         bool success = ValidateVersion(ext);
         if (!success)
@@ -95,24 +98,26 @@ public class ExtensionController : ControllerBase
 
     string CreateOrGetUloadDirectory()
     {
-        UploadDirectory = Path.Combine(_environment.ContentRootPath, UploadDirectory);
-        if (!Directory.Exists(UploadDirectory))
+        string uploadDirectory = "uploads";
+        uploadDirectory = Path.Combine(_environment.ContentRootPath, uploadDirectory);
+        if (!Directory.Exists(uploadDirectory))
         {
-            Directory.CreateDirectory(UploadDirectory);
+            Directory.CreateDirectory(uploadDirectory);
         }
 
-        return UploadDirectory;
+        return uploadDirectory;
     }
 
     string CreateOrGetOutputDirectory()
     {
-        OutputDirectory = Path.Combine(_environment.ContentRootPath, OutputDirectory);
-        if (!Directory.Exists(OutputDirectory))
+        string outputDirectory = "output";
+        outputDirectory = Path.Combine(_environment.ContentRootPath, outputDirectory);
+        if (!Directory.Exists(outputDirectory))
         {
-            Directory.CreateDirectory(OutputDirectory);
+            Directory.CreateDirectory(outputDirectory);
         }
 
-        return OutputDirectory;
+        return outputDirectory;
     }
 
     bool ValidateVersion(Extension ext)
@@ -122,34 +127,36 @@ public class ExtensionController : ControllerBase
         return success;
     }
 
-
-    public void ExtractFiles(string archiveFilePath, string destinationFolderPath)
+    public void ExtractFiles(string archiveFilePath, string destinationFolderPath, params string[] files)
     {
-        using (var fileStream = new FileStream(archiveFilePath, FileMode.Open, FileAccess.Read))
-        using (var zipFile = new ZipFile(fileStream))
-        {
-            // Find the package.json entry in the archive
-            var packageJsonEntry = zipFile.GetEntry("extension/package.json");
-            if (packageJsonEntry == null)
+        foreach (var file in files)
+        {  
+            using (var fileStream = new FileStream(archiveFilePath, FileMode.Open, FileAccess.Read))
+            using (var zipFile = new ZipFile(fileStream))
             {
-                throw new FileNotFoundException("Could not find package.json in the archive.");
-            }
+                // Find the package.json entry in the archive
+                var packageJsonEntry = zipFile.GetEntry($"extension/{file}");
+                if (packageJsonEntry == null)
+                {
+                    continue;
+                }
 
-            // Extract the package.json entry to the destination folder
-            string destinationFolder = Path.GetFileNameWithoutExtension(archiveFilePath);
-            var destinationFilePath = Path.Combine(destinationFolderPath, destinationFolder, "extension/package.json");
-            var directoryName = Path.GetDirectoryName(destinationFilePath);
-            if (!Directory.Exists(directoryName))
-            {
-                Directory.CreateDirectory(directoryName);
-            }
-            using (var outputStream = new FileStream(destinationFilePath, FileMode.Create))
-            using (var zipStream = zipFile.GetInputStream(packageJsonEntry))
-            {
-                // Use SharpZipLib's CopyStream method to copy the contents of the package.json entry to the output stream
-                // This will extract the file from the archive and save it to the destination folder
-                byte[] buffer = new byte[4096];
-                StreamUtils.Copy(zipStream, outputStream, buffer);
+                // Extract the package.json entry to the destination folder
+                string destinationFolder = Path.GetFileNameWithoutExtension(archiveFilePath);
+                var destinationFilePath = Path.Combine(destinationFolderPath, destinationFolder, Path.GetFileName(file));
+                var directoryName = Path.GetDirectoryName(destinationFilePath);
+                if (!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
+                {
+                    Directory.CreateDirectory(directoryName);
+                }
+                using (var outputStream = new FileStream(destinationFilePath, FileMode.Create))
+                using (var zipStream = zipFile.GetInputStream(packageJsonEntry))
+                {
+                    // Use SharpZipLib's CopyStream method to copy the contents of the package.json entry to the output stream
+                    // This will extract the file from the archive and save it to the destination folder
+                    byte[] buffer = new byte[4096];
+                    StreamUtils.Copy(zipStream, outputStream, buffer);
+                }
             }
         }
     }
@@ -168,9 +175,6 @@ public class ExtensionController : ControllerBase
     }
     readonly IDatabaseService _databaseService;
     readonly IExtensionService _extensionService;
-
-    string UploadDirectory = "uploads";
-    string OutputDirectory = "output";
 
     private readonly ILogger<ExtensionController> _logger;
     private readonly IWebHostEnvironment _environment;

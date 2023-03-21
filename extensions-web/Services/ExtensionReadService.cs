@@ -7,7 +7,7 @@ public class ExtensionService : IExtensionService
     public async Task<Extension> GetExtensionAsync([NotNull] string extensionName)
     {
         string extensionPath
-            = $"{_environment.ContentRootPath}/output/{extensionName}/extension";
+            = $"{_environment.ContentRootPath}/output/{extensionName}";
 
         string packageFile = Path.Combine(extensionPath, "package.json");
         Debug.WriteLine($"Package Path: {packageFile}");
