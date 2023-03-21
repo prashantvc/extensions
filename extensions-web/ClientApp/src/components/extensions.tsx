@@ -1,8 +1,7 @@
 import { Avatar, Badge, List, Space } from "antd";
 import React from "react";
-import type { UploadProps } from 'antd';
 import { Button, message, Upload, Typography } from 'antd';
-import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 import { Extension } from "../data/extension";
 import { UploadChangeParam } from "antd/es/upload/interface";
 
@@ -15,6 +14,8 @@ export class Extensions extends React.Component<
         loading: boolean;
     }
 > {
+
+    static displayName = Extensions.name;
 
     onChange(info: UploadChangeParam) {
         if (info.file.status !== 'uploading') {
