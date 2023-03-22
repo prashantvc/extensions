@@ -106,22 +106,18 @@ public class ExtensionController : ControllerBase
         return success;
     }
 
-
     public ExtensionController(
         [NotNull] IDatabaseService databaseService,
-        [NotNull] IExtensionService extensionService,
         [NotNull] ILogger<ExtensionController> logger,
         IWebHostEnvironment environment,
         IPackageReader manifestReader)
     {
         _databaseService = databaseService;
-        _extensionService = extensionService;
         _logger = logger;
         _environment = environment;
         _manifestReader = manifestReader;
     }
     readonly IDatabaseService _databaseService;
-    readonly IExtensionService _extensionService;
     readonly IPackageReader _manifestReader;
 
     private readonly ILogger<ExtensionController> _logger;
