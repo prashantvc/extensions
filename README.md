@@ -19,4 +19,5 @@ With private extension repository, you can ensure that your extensions are secur
 4. Finally, `dotnet run`
 
 # Screenshot
-<img width="937" alt="Screenshot 2023-03-22 at 00 16 30" src="https://user-images.githubusercontent.com/328076/226710996-c9169856-f1a9-4f86-ad27-313ccaa922f8.png">
+
+<img width="953" alt="Screenshot 2023-03-22 at 19 43 05" src="https://user-images.githubusercontent.com/328076/226931543-661ca28c-f7ad-4e0d-afb6-7a0abd43948c.png">
