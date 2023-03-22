@@ -1,5 +1,3 @@
-using ICSharpCode.SharpZipLib.Core;
-using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
 using System.Diagnostics.CodeAnalysis;
@@ -8,21 +6,32 @@ using System.Diagnostics.CodeAnalysis;
 [ApiController]
 public class ExtensionController : ControllerBase
 {
-    [HttpGet()]
+    [HttpGet("/extension")]
     public IActionResult GetExtensions(bool prerelease = false)
     {
-        var extensions = _databaseService.Extensions;
-        var extensionsList =
-          prerelease ?
-            extensions.Query().ToList() :
-            extensions.Find(p => !p.IsPreRelease).ToList();
+        var packages = _databaseService.Packages;
+        var packagesList = GetPreReleasePackages(prerelease);
 
-        _logger.LogInformation($"Number of Extensions {extensionsList.Count}");
+        _logger.LogInformation($"Number of Extensions {packagesList.Count}");
 
-        if (extensionsList.Count <= 0)
+        if (packagesList.Count <= 0)
             return NoContent();
 
-        return Ok(extensionsList);
+        return Ok(packagesList);
+    }
+
+    List<PackageManifest> GetPreReleasePackages(bool prerelease)
+    {
+        var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
+        : _databaseService.Packages.Find(p=>!p.IsPreRelease).ToList();
+
+        var mylist = packagesList.GroupBy(p => p.Identifier).Select(x =>
+             x.Where(r => r.Identifier == x.Key)
+                .OrderByDescending(r => r.Version)
+                .FirstOrDefault()
+        ).ToList();
+
+        return mylist;
     }
 
     [HttpGet]
@@ -32,7 +41,7 @@ public class ExtensionController : ControllerBase
         string latestVersion = version;
         if (string.IsNullOrWhiteSpace(latestVersion))
         {
-            SemVersion? ver = _databaseService.Extensions
+            SemVersion? ver = _databaseService.Packages
                 .Find(p => p.Identifier == id)
                 .Select(p => SemVersion.Parse(p.Version, SemVersionStyles.Strict))
                 .OrderDescending()
@@ -45,9 +54,9 @@ public class ExtensionController : ControllerBase
 
             latestVersion = ver.ToString();
         }
-        var extension = _databaseService.Extensions
+        var package = _databaseService.Packages
             .FindOne(p => p.Identifier == id && p.Version == latestVersion);
-        return Ok(extension);
+        return Ok(package);
     }
 
     [HttpPost, DisableRequestSizeLimit]
@@ -65,28 +74,12 @@ public class ExtensionController : ControllerBase
             await file.CopyToAsync(fileStream);
         }
 
-        string outputDirectory = CreateOrGetOutputDirectory();
-        string destination = Path.Combine(outputDirectory, filePath);
+        var package = _manifestReader.ExtractPackage(fileOnServer);
+        var result = _databaseService.InsertPackage(package);
 
-        ExtractFiles(fileOnServer, outputDirectory, "package.json");
+        MoveUploadedFile(fileOnServer);
 
-        string fileName = Path.GetFileNameWithoutExtension(filePath);
-        var ext = await _extensionService.GetExtensionAsync(fileName);
-        
-        //Extract metadata
-        ExtractFiles(fileOnServer, outputDirectory, ext.Icon, "README.MD", "LICENSE.txt");
-
-        System.IO.File.Move(fileOnServer, destination, true);
-
-        _databaseService.Extensions.Insert(ext);
-
-        bool success = ValidateVersion(ext);
-        if (!success)
-        {
-            return BadRequest($"Version validation failed!");
-        }
-
-        return Created($"/{ext.Identifier}", ext);
+        return Created($"/{package.Identifier}", package);
 
         static bool IsExtensionAllowed(string fileName)
         {
@@ -94,6 +87,13 @@ public class ExtensionController : ControllerBase
             string fileExtension = Path.GetExtension(fileName).ToLower();
             return !string.IsNullOrWhiteSpace(fileExtension) && permittedExtension == fileExtension;
         }
+    }
+
+    void MoveUploadedFile(string fileOnServer)
+    {
+        string uploadDirectory = _manifestReader.CreateOrGetOutputDirectory();
+        string fileName = Path.GetFileName(fileOnServer);
+        System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
 
     string CreateOrGetUloadDirectory()
@@ -108,73 +108,19 @@ public class ExtensionController : ControllerBase
         return uploadDirectory;
     }
 
-    string CreateOrGetOutputDirectory()
-    {
-        string outputDirectory = "output";
-        outputDirectory = Path.Combine(_environment.ContentRootPath, "ClientApp/public", outputDirectory);
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        return outputDirectory;
-    }
-
-    bool ValidateVersion(Extension ext)
-    {
-        bool success = SemVersion.TryParse(ext.Version, SemVersionStyles.Strict, out var version);
-        ext.IsPreRelease = version.IsPrerelease;
-        return success;
-    }
-
-    public void ExtractFiles(string archiveFilePath, string destinationFolderPath, params string[] files)
-    {
-        foreach (var file in files)
-        {  
-            using (var fileStream = new FileStream(archiveFilePath, FileMode.Open, FileAccess.Read))
-            using (var zipFile = new ZipFile(fileStream))
-            {
-                // Find the package.json entry in the archive
-                var packageJsonEntry = zipFile.GetEntry($"extension/{file}");
-                if (packageJsonEntry == null)
-                {
-                    continue;
-                }
-
-                // Extract the package.json entry to the destination folder
-                string destinationFolder = Path.GetFileNameWithoutExtension(archiveFilePath);
-                var destinationFilePath = Path.Combine(destinationFolderPath, destinationFolder, Path.GetFileName(file));
-                var directoryName = Path.GetDirectoryName(destinationFilePath);
-                if (!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-                using (var outputStream = new FileStream(destinationFilePath, FileMode.Create))
-                using (var zipStream = zipFile.GetInputStream(packageJsonEntry))
-                {
-                    // Use SharpZipLib's CopyStream method to copy the contents of the package.json entry to the output stream
-                    // This will extract the file from the archive and save it to the destination folder
-                    byte[] buffer = new byte[4096];
-                    StreamUtils.Copy(zipStream, outputStream, buffer);
-                }
-            }
-        }
-    }
-
-
     public ExtensionController(
         [NotNull] IDatabaseService databaseService,
-        [NotNull] IExtensionService extensionService,
         [NotNull] ILogger<ExtensionController> logger,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment,
+        IPackageReader manifestReader)
     {
         _databaseService = databaseService;
-        _extensionService = extensionService;
         _logger = logger;
         _environment = environment;
+        _manifestReader = manifestReader;
     }
     readonly IDatabaseService _databaseService;
-    readonly IExtensionService _extensionService;
+    readonly IPackageReader _manifestReader;
 
     private readonly ILogger<ExtensionController> _logger;
     private readonly IWebHostEnvironment _environment;
