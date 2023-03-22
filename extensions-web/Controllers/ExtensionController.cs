@@ -1,5 +1,3 @@
-using ICSharpCode.SharpZipLib.Core;
-using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
 using System.Diagnostics.CodeAnalysis;
@@ -12,10 +10,7 @@ public class ExtensionController : ControllerBase
     public IActionResult GetExtensions(bool prerelease = false)
     {
         var packages = _databaseService.Packages;
-        var packagesList =
-          prerelease ?
-            packages.Query().ToList() :
-            packages.Find(p => !p.IsPreRelease).ToList();
+        var packagesList = GetPreReleasePackages(prerelease);
 
         _logger.LogInformation($"Number of Extensions {packagesList.Count}");
 
@@ -23,6 +18,20 @@ public class ExtensionController : ControllerBase
             return NoContent();
 
         return Ok(packagesList);
+    }
+
+    List<PackageManifest> GetPreReleasePackages(bool prerelease)
+    {
+        var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
+        : _databaseService.Packages.Find(p=>!p.IsPreRelease).ToList();
+
+        var mylist = packagesList.GroupBy(p => p.Identifier).Select(x =>
+             x.Where(r => r.Identifier == x.Key)
+                .OrderByDescending(r => r.Version)
+                .FirstOrDefault()
+        ).ToList();
+
+        return mylist;
     }
 
     [HttpGet]
@@ -66,7 +75,7 @@ public class ExtensionController : ControllerBase
         }
 
         var package = _manifestReader.ExtractPackage(fileOnServer);
-        var result = _databaseService.Packages.Insert(package);
+        var result = _databaseService.InsertPackage(package);
 
         MoveUploadedFile(fileOnServer);
 
@@ -97,13 +106,6 @@ public class ExtensionController : ControllerBase
         }
 
         return uploadDirectory;
-    }
-
-    bool ValidateVersion(Extension ext)
-    {
-        bool success = SemVersion.TryParse(ext.Version, SemVersionStyles.Strict, out var version);
-        ext.IsPreRelease = version.IsPrerelease;
-        return success;
     }
 
     public ExtensionController(

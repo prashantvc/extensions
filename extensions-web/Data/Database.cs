@@ -1,24 +1,31 @@
 using LiteDB;
+using Semver;
 
 public class DatabaseService : IDatabaseService
 {
 
-    public void InsertPackage(PackageManifest package)
+    public BsonValue InsertPackage(PackageManifest package)
     {
-        Packages.Insert(package);
+        bool success = ValidateVersion(package);
+        if (!success)
+        {
+            throw new InvalidOperationException("Version is not SemVer compliant.");
+        }
+
+        return Packages.Insert(package);
     }
 
-    public void InsertExtension(Extension extension)
+    bool ValidateVersion(PackageManifest package)
     {
-        Extensions.Insert(extension);
+        bool success = SemVersion.TryParse(package.Version, SemVersionStyles.Strict, out var version);
+        package.IsPreRelease = version.IsPrerelease;
+        return success;
     }
+
 
     public ILiteCollection<PackageManifest> Packages =>
         _database.GetCollection<PackageManifest>("packages");
 
-    public ILiteCollection<Extension> Extensions =>
-        _database.GetCollection<Extension>("extensions");
- 
      public DatabaseService(ILiteDbContext liteDbContext)
     {
         _database = liteDbContext.Database;
