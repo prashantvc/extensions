@@ -65,28 +65,9 @@ public class ExtensionController : ControllerBase
             await file.CopyToAsync(fileStream);
         }
 
-        string outputDirectory = CreateOrGetOutputDirectory();
-        string destination = Path.Combine(outputDirectory, filePath);
+        _manifestReader.ExtractFile(fileOnServer);
 
-        ExtractFiles(fileOnServer, outputDirectory, "package.json");
-
-        string fileName = Path.GetFileNameWithoutExtension(filePath);
-        var ext = await _extensionService.GetExtensionAsync(fileName);
-        
-        //Extract metadata
-        ExtractFiles(fileOnServer, outputDirectory, ext.Icon, "README.MD", "LICENSE.txt");
-
-        System.IO.File.Move(fileOnServer, destination, true);
-
-        _databaseService.Extensions.Insert(ext);
-
-        bool success = ValidateVersion(ext);
-        if (!success)
-        {
-            return BadRequest($"Version validation failed!");
-        }
-
-        return Created($"/{ext.Identifier}", ext);
+        return Ok();
 
         static bool IsExtensionAllowed(string fileName)
         {
@@ -130,7 +111,7 @@ public class ExtensionController : ControllerBase
     public void ExtractFiles(string archiveFilePath, string destinationFolderPath, params string[] files)
     {
         foreach (var file in files)
-        {  
+        {
             using (var fileStream = new FileStream(archiveFilePath, FileMode.Open, FileAccess.Read))
             using (var zipFile = new ZipFile(fileStream))
             {
@@ -166,15 +147,18 @@ public class ExtensionController : ControllerBase
         [NotNull] IDatabaseService databaseService,
         [NotNull] IExtensionService extensionService,
         [NotNull] ILogger<ExtensionController> logger,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment,
+        IPackageReader manifestReader)
     {
         _databaseService = databaseService;
         _extensionService = extensionService;
         _logger = logger;
         _environment = environment;
+        _manifestReader = manifestReader;
     }
     readonly IDatabaseService _databaseService;
     readonly IExtensionService _extensionService;
+    readonly IPackageReader _manifestReader;
 
     private readonly ILogger<ExtensionController> _logger;
     private readonly IWebHostEnvironment _environment;

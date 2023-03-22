@@ -12,6 +12,7 @@ builder.Services.Configure<FormOptions>(p =>
 
 builder.Services.AddSingleton<IExtensionService, ExtensionService>();
 builder.Services.AddSingleton<ILiteDbContext, LiteDbContext>();
+builder.Services.AddSingleton<IPackageReader, PackageReader>();
 builder.Services.AddTransient<IDatabaseService, DatabaseService>();
 
 // Add services to the container.
