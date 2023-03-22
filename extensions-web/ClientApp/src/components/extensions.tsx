@@ -1,4 +1,4 @@
-import { Avatar, Badge, List, Space } from "antd";
+import { Avatar, Badge, Divider, List, Space, Switch } from "antd";
 import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
@@ -12,6 +12,7 @@ export class Extensions extends React.Component<
     {
         packages: PackageWrapper[];
         loading: boolean;
+        showPrerelease: boolean;
     }
 > {
 
@@ -29,18 +30,30 @@ export class Extensions extends React.Component<
         }
     }
 
+    onSwitchChange = (checked: boolean) => {
+        this.setState({ showPrerelease: checked }, () => {
+            this.populateExtensions();
+        });
+    }
+
     constructor(props: any) {
         super(props);
-        this.state = { packages: [], loading: true };
+        this.state = { packages: [], loading: true, showPrerelease: false };
     }
 
     public render() {
         return (
             <div>
-                <Upload name="file" action="extension" onChange={this.onChange}>
-                    <Button icon={<UploadOutlined />}>Upload Extension</Button>
-                </Upload>
-                <br />
+                <Space align="center" size="large">
+                    <Upload name="file" action="extension" onChange={this.onChange}>
+                        <Button icon={<UploadOutlined />}>Upload Extension</Button>
+                    </Upload>
+                    <Space>
+                        <Text>Show pre-release</Text>
+                        <Switch onChange={this.onSwitchChange} />
+                    </Space>
+                </Space>
+                <Divider />
                 <List itemLayout="horizontal"
                     dataSource={this.state.packages}
                     renderItem={(item, index) => (
@@ -81,7 +94,8 @@ export class Extensions extends React.Component<
         console.log("Populating extensions");
         this.setState({ loading: true })
 
-        const response = await fetch("extension");
+        console.log(`extension?prerelease=${this.state.showPrerelease}`);
+        const response = await fetch(`extension?prerelease=${this.state.showPrerelease}`);
         const extensionData: IPackage[] = await response.json();
         const packages = extensionData.map(p => new PackageWrapper(p))
 
