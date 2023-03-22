@@ -5,6 +5,8 @@ public interface IPackageReader
 {
     string ExtractFile(string fileOnServer, string extractFileName);
     PackageManifest ExtractPackage(string fileOnServer);
+
+    public string CreateOrGetOutputDirectory();
 }
 
 public class PackageReader : IPackageReader
@@ -62,7 +64,7 @@ public class PackageReader : IPackageReader
             Directory.CreateDirectory(Path.GetDirectoryName(path));
     }
 
-    string CreateOrGetOutputDirectory()
+    public string CreateOrGetOutputDirectory()
     {
         string outputDirectory = "output";
         outputDirectory = Path.Combine(_environment.ContentRootPath, "ClientApp/public", outputDirectory);

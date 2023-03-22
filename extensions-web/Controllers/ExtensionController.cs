@@ -67,8 +67,10 @@ public class ExtensionController : ControllerBase
 
         var package = _manifestReader.ExtractPackage(fileOnServer);
         var result = _databaseService.Packages.Insert(package);
-        
-         return Created($"/{package.Identifier}", package);
+
+        MoveUploadedFile(fileOnServer);
+
+        return Created($"/{package.Identifier}", package);
 
         static bool IsExtensionAllowed(string fileName)
         {
@@ -76,6 +78,13 @@ public class ExtensionController : ControllerBase
             string fileExtension = Path.GetExtension(fileName).ToLower();
             return !string.IsNullOrWhiteSpace(fileExtension) && permittedExtension == fileExtension;
         }
+    }
+
+    void MoveUploadedFile(string fileOnServer)
+    {
+        string uploadDirectory = _manifestReader.CreateOrGetOutputDirectory();
+        string fileName = Path.GetFileName(fileOnServer);
+        System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
 
     string CreateOrGetUloadDirectory()
@@ -90,57 +99,11 @@ public class ExtensionController : ControllerBase
         return uploadDirectory;
     }
 
-    string CreateOrGetOutputDirectory()
-    {
-        string outputDirectory = "output";
-        outputDirectory = Path.Combine(_environment.ContentRootPath, "ClientApp/public", outputDirectory);
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        return outputDirectory;
-    }
-
     bool ValidateVersion(Extension ext)
     {
         bool success = SemVersion.TryParse(ext.Version, SemVersionStyles.Strict, out var version);
         ext.IsPreRelease = version.IsPrerelease;
         return success;
-    }
-
-    public void ExtractFiles(string archiveFilePath, string destinationFolderPath, params string[] files)
-    {
-        foreach (var file in files)
-        {
-            using (var fileStream = new FileStream(archiveFilePath, FileMode.Open, FileAccess.Read))
-            using (var zipFile = new ZipFile(fileStream))
-            {
-                // Find the package.json entry in the archive
-                var packageJsonEntry = zipFile.GetEntry($"extension/{file}");
-                if (packageJsonEntry == null)
-                {
-                    continue;
-                }
-
-                // Extract the package.json entry to the destination folder
-                string destinationFolder = Path.GetFileNameWithoutExtension(archiveFilePath);
-                var destinationFilePath = Path.Combine(destinationFolderPath, destinationFolder, Path.GetFileName(file));
-                var directoryName = Path.GetDirectoryName(destinationFilePath);
-                if (!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-                using (var outputStream = new FileStream(destinationFilePath, FileMode.Create))
-                using (var zipStream = zipFile.GetInputStream(packageJsonEntry))
-                {
-                    // Use SharpZipLib's CopyStream method to copy the contents of the package.json entry to the output stream
-                    // This will extract the file from the archive and save it to the destination folder
-                    byte[] buffer = new byte[4096];
-                    StreamUtils.Copy(zipStream, outputStream, buffer);
-                }
-            }
-        }
     }
 
 
