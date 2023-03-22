@@ -35,8 +35,12 @@ export class PackageWrapper {
     }
 
     public get iconPath(): string  {
-        let path = this.extensionPackage.assets.find(a => a.assetType === "Microsoft.VisualStudio.Services.Icons.Default")!.path;
+        let path = this.extensionPackage.assets.find(a => a.assetType === "Microsoft.VisualStudio.Services.Icons.Default")?.path;
     
+        if(path === undefined || path === null) {
+            return "";
+        }
+
         var iconPath = (this.extensionPackage.metadata.identity.targetPlatform !==null) ? 
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}/${path}`:
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}/${path}`

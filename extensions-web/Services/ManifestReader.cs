@@ -14,24 +14,18 @@ public class PackageReader : IPackageReader
     public PackageManifest ExtractPackage(string fileOnServer)
     {
         string outputFilePath = ExtractFile(fileOnServer, "extension.vsixmanifest");
-        PackageManifest packageManifest;
+        PackageManifest? packageManifest = default(PackageManifest);
 
         var serializer = new XmlSerializer(typeof(PackageManifest));
-        using (var stream = new StringReader(File.ReadAllText(outputFilePath)))
+        using (StringReader stream = new StringReader(File.ReadAllText(outputFilePath)))
         {
-            packageManifest = (PackageManifest)serializer.Deserialize(stream);
-            var assets = packageManifest.Assets;
+            packageManifest = serializer.Deserialize(stream) as PackageManifest;
+            var assets = packageManifest?.Assets;
 
             foreach (var asset in assets)
             {
-                try
-                {
+                if (asset.Path != null)
                     ExtractFile(fileOnServer, asset.Path);
-                }
-                catch (NullReferenceException)
-                {
-                    continue;
-                }
             }
         }
 
@@ -60,8 +54,9 @@ public class PackageReader : IPackageReader
 
     void CreateDirectory(string path)
     {
-        if (!Directory.Exists(Path.GetDirectoryName(path)))
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
+        string? directoryName = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
+            Directory.CreateDirectory(directoryName);
     }
 
     public string CreateOrGetOutputDirectory()

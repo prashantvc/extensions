@@ -10,7 +10,6 @@ builder.Services.Configure<FormOptions>(p =>
     p.MemoryBufferThreshold = int.MaxValue;
 });
 
-builder.Services.AddSingleton<IExtensionService, ExtensionService>();
 builder.Services.AddSingleton<ILiteDbContext, LiteDbContext>();
 builder.Services.AddSingleton<IPackageReader, PackageReader>();
 builder.Services.AddTransient<IDatabaseService, DatabaseService>();
