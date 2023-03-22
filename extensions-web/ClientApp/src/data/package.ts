@@ -29,9 +29,7 @@ export class PackageWrapper {
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}.vsix`:
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}.vsix`
         
-        console.info(`iconPath: ${iconPath}`);
         return iconPath;
-
     }
 
     public get iconPath(): string  {
@@ -44,10 +42,7 @@ export class PackageWrapper {
         var iconPath = (this.extensionPackage.metadata.identity.targetPlatform !==null) ? 
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}/${path}`:
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}/${path}`
-        
-        console.info(`iconPath: ${iconPath}`);
         return iconPath;
-
     }
 
     public get Description(): string {
