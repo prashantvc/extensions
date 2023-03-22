@@ -10,6 +10,8 @@ public class PackageManifest
     public List<Asset> Assets { get; set; }
     public string Identifier => $"{Metadata!.Identity!.Publisher}.{Metadata.Identity.Id}";
     public bool IsPreRelease { get; set; }
+
+    public string Version => Metadata.Identity.Version;
 }
 
 public class Metadata
@@ -23,7 +25,10 @@ public class Metadata
     [XmlElement("Categories")]
     public string? CategoryString { get; set; }
 
-    public string[] Categories => CategoryString!.Split(',');
+    [XmlElement("Description")]
+    public string? Description { get; set; }
+
+    public string[] Categories => CategoryString?.Split(',');
 }
 
 public class Identity

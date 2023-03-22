@@ -2,15 +2,15 @@ import { Avatar, Badge, List, Space } from "antd";
 import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { Extension } from "../data/extension";
 import { UploadChangeParam } from "antd/es/upload/interface";
+import { IPackage, PackageWrapper } from "../data/package";
 
 const { Text } = Typography;
 
 export class Extensions extends React.Component<
     {},
     {
-        extensions: Extension[];
+        packages: PackageWrapper[];
         loading: boolean;
     }
 > {
@@ -31,7 +31,7 @@ export class Extensions extends React.Component<
 
     constructor(props: any) {
         super(props);
-        this.state = { extensions: [], loading: true };
+        this.state = { packages: [], loading: true };
     }
 
     public render() {
@@ -41,24 +41,24 @@ export class Extensions extends React.Component<
                     <Button icon={<UploadOutlined />}>Upload Extension</Button>
                 </Upload>
                 <br />
-                <List itemLayout="horizontal" 
-                    dataSource={this.state.extensions}
+                <List itemLayout="horizontal"
+                    dataSource={this.state.packages}
                     renderItem={(item, index) => (
                         <List.Item
-                        actions={[
-                            <Button type="primary" href={`output/${item.identifier}-${item.version}.vsix`}>Download</Button>
-                        ]}>
+                            actions={[
+                                <Button type="primary" href={item.packagePath}>Download</Button>
+                            ]}>
                             <List.Item.Meta
                                 avatar={
-                                    <Avatar shape="square" size="large" src={`output/${item.identifier}-${item.version}/${item.icon}`}/>
+                                    <Avatar shape="square" size="large" src={item.iconPath} />
                                 }
                                 title={
                                     <Space>
                                         {item.displayName}
-                                        <Text type="secondary">{item.identifier}</Text>
+                                        <Text type="secondary">{item.extensionPackage.identifier}</Text>
                                         <Badge
                                             className="site-badge-count-109"
-                                            count={item.version}
+                                            count={item.extensionPackage.version}
                                             style={{ backgroundColor: '#52c41a' }}
                                         />
                                     </Space>
@@ -82,8 +82,9 @@ export class Extensions extends React.Component<
         this.setState({ loading: true })
 
         const response = await fetch("extension");
-        const extensionData: Extension[] = await response.json();
+        const extensionData: IPackage[] = await response.json();
+        const packages = extensionData.map(p => new PackageWrapper(p))
 
-        this.setState({ extensions: extensionData, loading: false });
+        this.setState({ packages: packages, loading: false });
     }
 }

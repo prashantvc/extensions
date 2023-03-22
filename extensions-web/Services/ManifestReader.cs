@@ -4,19 +4,20 @@ using System.Xml.Serialization;
 public interface IPackageReader
 {
     string ExtractFile(string fileOnServer, string extractFileName);
-    void ExtractPackage(string fileOnServer);
+    PackageManifest ExtractPackage(string fileOnServer);
 }
 
 public class PackageReader : IPackageReader
 {
-    public void ExtractPackage(string fileOnServer)
+    public PackageManifest ExtractPackage(string fileOnServer)
     {
         string outputFilePath = ExtractFile(fileOnServer, "extension.vsixmanifest");
+        PackageManifest packageManifest;
 
         var serializer = new XmlSerializer(typeof(PackageManifest));
         using (var stream = new StringReader(File.ReadAllText(outputFilePath)))
         {
-            var packageManifest = (PackageManifest)serializer.Deserialize(stream);
+            packageManifest = (PackageManifest)serializer.Deserialize(stream);
             var assets = packageManifest.Assets;
 
             foreach (var asset in assets)
@@ -31,6 +32,8 @@ public class PackageReader : IPackageReader
                 }
             }
         }
+
+        return packageManifest;
     }
     public string ExtractFile(string fileOnServer, string extractFileName)
     {

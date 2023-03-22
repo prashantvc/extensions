@@ -8,21 +8,21 @@ using System.Diagnostics.CodeAnalysis;
 [ApiController]
 public class ExtensionController : ControllerBase
 {
-    [HttpGet()]
+    [HttpGet("/extension")]
     public IActionResult GetExtensions(bool prerelease = false)
     {
-        var extensions = _databaseService.Extensions;
-        var extensionsList =
+        var packages = _databaseService.Packages;
+        var packagesList =
           prerelease ?
-            extensions.Query().ToList() :
-            extensions.Find(p => !p.IsPreRelease).ToList();
+            packages.Query().ToList() :
+            packages.Find(p => !p.IsPreRelease).ToList();
 
-        _logger.LogInformation($"Number of Extensions {extensionsList.Count}");
+        _logger.LogInformation($"Number of Extensions {packagesList.Count}");
 
-        if (extensionsList.Count <= 0)
+        if (packagesList.Count <= 0)
             return NoContent();
 
-        return Ok(extensionsList);
+        return Ok(packagesList);
     }
 
     [HttpGet]
@@ -32,7 +32,7 @@ public class ExtensionController : ControllerBase
         string latestVersion = version;
         if (string.IsNullOrWhiteSpace(latestVersion))
         {
-            SemVersion? ver = _databaseService.Extensions
+            SemVersion? ver = _databaseService.Packages
                 .Find(p => p.Identifier == id)
                 .Select(p => SemVersion.Parse(p.Version, SemVersionStyles.Strict))
                 .OrderDescending()
@@ -45,9 +45,9 @@ public class ExtensionController : ControllerBase
 
             latestVersion = ver.ToString();
         }
-        var extension = _databaseService.Extensions
+        var package = _databaseService.Packages
             .FindOne(p => p.Identifier == id && p.Version == latestVersion);
-        return Ok(extension);
+        return Ok(package);
     }
 
     [HttpPost, DisableRequestSizeLimit]
@@ -65,9 +65,10 @@ public class ExtensionController : ControllerBase
             await file.CopyToAsync(fileStream);
         }
 
-        _manifestReader.ExtractPackage(fileOnServer);
-
-        return Ok();
+        var package = _manifestReader.ExtractPackage(fileOnServer);
+        var result = _databaseService.Packages.Insert(package);
+        
+         return Created($"/{package.Identifier}", package);
 
         static bool IsExtensionAllowed(string fileName)
         {
