@@ -1,7 +1,7 @@
-import { Avatar, Badge, Divider, List, Space, Switch } from "antd";
+import { Avatar, Divider, List, Space, Switch, Tag } from "antd";
 import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { UploadChangeParam } from "antd/es/upload/interface";
 import { IPackage, PackageWrapper } from "../data/package";
 
@@ -46,7 +46,7 @@ export class Extensions extends React.Component<
             <div>
                 <Space align="center" size="large">
                     <Upload name="file" action="extension" onChange={this.onChange}>
-                        <Button icon={<UploadOutlined />}>Upload Extension</Button>
+                        <Button icon={<PlusOutlined />}>Upload Extension</Button>
                     </Upload>
                     <Space>
                         <Text>Show pre-release</Text>
@@ -59,21 +59,17 @@ export class Extensions extends React.Component<
                     renderItem={(item, index) => (
                         <List.Item
                             actions={[
-                                <Button type="primary" href={item.packagePath}>Download</Button>
+                                <Button size="small" type="primary" href={item.packagePath} icon={<DownloadOutlined />}>Download</Button>
                             ]}>
                             <List.Item.Meta
                                 avatar={
                                     <Avatar shape="square" size="large" src={item.iconPath} />
                                 }
                                 title={
-                                    <Space>
+                                    <Space align="center">
                                         {item.displayName}
                                         <Text type="secondary">{item.extensionPackage.identifier}</Text>
-                                        <Badge
-                                            className="site-badge-count-109"
-                                            count={item.extensionPackage.version}
-                                            style={{ backgroundColor: '#52c41a' }}
-                                        />
+                                        <Tag>v{item.extensionPackage.version}</Tag>
                                     </Space>
 
                                 }
