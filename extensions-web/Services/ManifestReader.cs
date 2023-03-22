@@ -1,36 +1,62 @@
 using System.IO.Compression;
+using System.Xml.Serialization;
 
 public interface IPackageReader
 {
-    void ExtractFile(string fileOnServer, string extractFileName = "extension.vsixmanifest");
+    string ExtractFile(string fileOnServer, string extractFileName);
+    void ExtractPackage(string fileOnServer);
 }
 
 public class PackageReader : IPackageReader
 {
-    public void ExtractFile(string fileOnServer, string extractFileName)
+    public void ExtractPackage(string fileOnServer)
+    {
+        string outputFilePath = ExtractFile(fileOnServer, "extension.vsixmanifest");
+
+        var serializer = new XmlSerializer(typeof(PackageManifest));
+        using (var stream = new StringReader(File.ReadAllText(outputFilePath)))
+        {
+            var packageManifest = (PackageManifest)serializer.Deserialize(stream);
+            var assets = packageManifest.Assets;
+
+            foreach (var asset in assets)
+            {
+                try
+                {
+                    ExtractFile(fileOnServer, asset.Path);
+                }
+                catch (NullReferenceException)
+                {
+                    continue;
+                }
+            }
+        }
+    }
+    public string ExtractFile(string fileOnServer, string extractFileName)
     {
         string outputDirectory = CreateOrGetOutputDirectory();
         string fileName = Path.GetFileNameWithoutExtension(fileOnServer);
-        string manifestFilePath = Path.Combine(outputDirectory, fileName, extractFileName);
 
-        CreateDirectory(manifestFilePath);
+        string extractFilePath = Path.Combine(outputDirectory, fileName, extractFileName);
+
+        CreateDirectory(extractFilePath);
 
         using (var archive = ZipFile.OpenRead(fileOnServer))
         {
             var manifestEntry = archive.GetEntry(extractFileName);
             if (manifestEntry != null)
             {
-                manifestEntry.ExtractToFile(manifestFilePath);
+                manifestEntry.ExtractToFile(extractFilePath);
             }
         }
 
-        void CreateDirectory(string manifestFilePath)
-        {
-            if (!Directory.Exists(Path.GetDirectoryName(manifestFilePath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(manifestFilePath));
-            }
-        }
+        return extractFilePath;
+    }
+
+    void CreateDirectory(string path)
+    {
+        if (!Directory.Exists(Path.GetDirectoryName(path)))
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
     }
 
     string CreateOrGetOutputDirectory()

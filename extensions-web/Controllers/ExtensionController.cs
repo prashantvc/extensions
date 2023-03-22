@@ -65,7 +65,7 @@ public class ExtensionController : ControllerBase
             await file.CopyToAsync(fileStream);
         }
 
-        _manifestReader.ExtractFile(fileOnServer);
+        _manifestReader.ExtractPackage(fileOnServer);
 
         return Ok();
 
