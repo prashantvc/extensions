@@ -4,12 +4,12 @@
 //
 //   const package = Convert.toPackage(json);
 
-export interface IPackage{
-    metadata:     Metadata;
-    assets:       Asset[];
-    identifier:   string;
+export interface IPackage {
+    metadata: Metadata;
+    assets: Asset[];
+    identifier: string;
     isPreRelease: boolean;
-    version:      string;
+    version: string;
 }
 
 export class PackageWrapper {
@@ -17,32 +17,35 @@ export class PackageWrapper {
         this.extensionPackage = extensionPackage;
     }
 
-    public get displayName() :string {
+    public get displayName(): string {
         return this.extensionPackage.metadata.displayName;
     }
-    public get description() :string {
+    public get description(): string {
         return this.extensionPackage.metadata.description;
     }
 
-    public get packagePath(): string  {
-        var iconPath = (this.extensionPackage.metadata.identity.targetPlatform !==null) ? 
-            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}.vsix`:
-            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}.vsix`
-        
-        return iconPath;
+    public get packagePath(): string {
+        var packagePath = `${this.extensionPath()}.vsix`
+        return packagePath;
     }
 
-    public get iconPath(): string  {
+    public get iconPath(): string {
         let path = this.extensionPackage.assets.find(a => a.assetType === "Microsoft.VisualStudio.Services.Icons.Default")?.path;
-    
-        if(path === undefined || path === null) {
+
+        if (path === undefined || path === null) {
             return "favicon.ico";
         }
 
-        var iconPath = (this.extensionPackage.metadata.identity.targetPlatform !==null) ? 
-            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}/${path}`:
-            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}/${path}`
+        var iconPath = `${this.extensionPath()}/${path}`;
         return iconPath;
+    }
+
+    extensionPath(): string {
+        var extensionPath = (this.extensionPackage.metadata.identity.targetPlatform !== null) ?
+            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}` :
+            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}`
+
+        return extensionPath;
     }
 
     public get Description(): string {
@@ -54,22 +57,22 @@ export class PackageWrapper {
 
 export interface Asset {
     assetType: string;
-    path:      string;
+    path: string;
 }
 
 export interface Metadata {
-    identity:       Identity;
-    displayName:    string;
+    identity: Identity;
+    displayName: string;
     categoryString: string;
-    categories:     string[];
-    description:  string;
+    categories: string[];
+    description: string;
 }
 
 export interface Identity {
-    language:       string;
-    id:             string;
-    version:        string;
-    publisher:      string;
+    language: string;
+    id: string;
+    version: string;
+    publisher: string;
     targetPlatform: string;
 }
 

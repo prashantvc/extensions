@@ -4,6 +4,7 @@ import { Button, message, Upload, Typography } from 'antd';
 import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { UploadChangeParam } from "antd/es/upload/interface";
 import { IPackage, PackageWrapper } from "../data/package";
+import { NavLink } from "react-router-dom";
 
 const { Text } = Typography;
 
@@ -24,7 +25,6 @@ export class Extensions extends React.Component<
         }
         if (info.file.status === 'done') {
             message.success(`${info.file.name} file uploaded successfully`);
-            this.populateExtensions();
         } else if (info.file.status === 'error') {
             message.error(`${info.file.name} file upload failed.`);
         }
@@ -67,7 +67,10 @@ export class Extensions extends React.Component<
                                 }
                                 title={
                                     <Space align="center">
-                                        {item.displayName}
+                                        <NavLink to={`/details/${item.extensionPackage.identifier}/${item.extensionPackage.version}`}>
+                                            {item.displayName}
+                                        </NavLink>
+
                                         <Text type="secondary">{item.extensionPackage.identifier}</Text>
                                         <Tag>v{item.extensionPackage.version}</Tag>
                                     </Space>
@@ -85,6 +88,8 @@ export class Extensions extends React.Component<
     componentDidMount(): void {
         this.populateExtensions();
     }
+
+    
 
     async populateExtensions() {
         console.log("Populating extensions");
