@@ -1,24 +1,37 @@
 using Microsoft.AspNetCore.Mvc;
 using Semver;
-using System.Diagnostics.Eventing.Reader;
+using System.Diagnostics.CodeAnalysis;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class ExtensionController : ControllerBase
 {
-    [HttpGet()]
+    [HttpGet("/extension")]
     public IActionResult GetExtensions(bool prerelease = false)
     {
-        var extensions = _databaseService.Extensions;
-        var extensionsList =
-          prerelease ?
-            extensions.Query().ToList() :
-            extensions.Find(p => !p.IsPreRelease).ToList();
+        var packages = _databaseService.Packages;
+        var packagesList = GetPreReleasePackages(prerelease);
 
-        if (extensionsList.Count <= 0)
+        _logger.LogInformation($"Number of Extensions {packagesList.Count}");
+
+        if (packagesList.Count <= 0)
             return NoContent();
 
-        return Ok(extensionsList);
+        return Ok(packagesList);
+    }
+
+    List<PackageManifest> GetPreReleasePackages(bool prerelease)
+    {
+        var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
+        : _databaseService.Packages.Find(p=>!p.IsPreRelease).ToList();
+
+        var mylist = packagesList.GroupBy(p => p.Identifier).Select(x =>
+             x.Where(r => r.Identifier == x.Key)
+                .OrderByDescending(r => r.Version)
+                .FirstOrDefault()
+        ).ToList();
+
+        return mylist;
     }
 
     [HttpGet]
@@ -28,7 +41,7 @@ public class ExtensionController : ControllerBase
         string latestVersion = version;
         if (string.IsNullOrWhiteSpace(latestVersion))
         {
-            SemVersion? ver = _databaseService.Extensions
+            SemVersion? ver = _databaseService.Packages
                 .Find(p => p.Identifier == id)
                 .Select(p => SemVersion.Parse(p.Version, SemVersionStyles.Strict))
                 .OrderDescending()
@@ -41,47 +54,32 @@ public class ExtensionController : ControllerBase
 
             latestVersion = ver.ToString();
         }
-        var extension = _databaseService.Extensions
+        var package = _databaseService.Packages
             .FindOne(p => p.Identifier == id && p.Version == latestVersion);
-        return Ok(extension);
+        return Ok(package);
     }
 
     [HttpPost, DisableRequestSizeLimit]
     public async Task<IActionResult> AddExtensionsAsync(IFormFile file)
     {
         string filePath = file.FileName;
-
-        if(!IsExtensionAllowed(filePath))
+        if (!IsExtensionAllowed(filePath))
             return BadRequest("Bad extension");
 
-        string uploadLocation = Path.Combine(UploadDirectory, filePath);
-        if (!Directory.Exists(uploadLocation))
-        {
-            Directory.CreateDirectory(UploadDirectory);
-        }
-        using (var fileStream = new FileStream(uploadLocation, FileMode.Create))
+        string uploadDirectory = CreateOrGetUloadDirectory();
+
+        string fileOnServer = Path.Combine(uploadDirectory, filePath);
+        using (var fileStream = new FileStream(fileOnServer, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
 
-        string destination = Path.Combine(OutputDirectory, filePath);
+        var package = _manifestReader.ExtractPackage(fileOnServer);
+        var result = _databaseService.InsertPackage(package);
 
-        ZipService.Instance.ExtractPackage(uploadLocation);
-        System.IO.File.Move(uploadLocation, destination, true);
+        MoveUploadedFile(fileOnServer);
 
-        
-        string fileName = Path.GetFileNameWithoutExtension(filePath);
-        var ext = await _extensionService.GetExtensionAsync(fileName);
-
-        bool success = ValidateVersion(ext);
-        if (!success)
-            return BadRequest($"Version validation failed!");
-
-        _databaseService.Extensions.Insert(ext);
-
-        Console.WriteLine($"Extension name: {ext.DisplayName}");
-
-        return Created($"/{ext.Identifier}", ext);
+        return Created($"/{package.Identifier}", package);
 
         static bool IsExtensionAllowed(string fileName)
         {
@@ -91,22 +89,39 @@ public class ExtensionController : ControllerBase
         }
     }
 
-    bool ValidateVersion(Extension ext)
+    void MoveUploadedFile(string fileOnServer)
     {
-        bool success = SemVersion.TryParse(ext.Version, SemVersionStyles.Strict, out var version);
-        ext.IsPreRelease = version.IsPrerelease;
-        return success;
+        string uploadDirectory = _manifestReader.CreateOrGetOutputDirectory();
+        string fileName = Path.GetFileName(fileOnServer);
+        System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
 
-    public ExtensionController([NotNull] IDatabaseService databaseService,
-        [NotNull] IExtensionService extensionService)
+    string CreateOrGetUloadDirectory()
+    {
+        string uploadDirectory = "uploads";
+        uploadDirectory = Path.Combine(_environment.ContentRootPath, uploadDirectory);
+        if (!Directory.Exists(uploadDirectory))
+        {
+            Directory.CreateDirectory(uploadDirectory);
+        }
+
+        return uploadDirectory;
+    }
+
+    public ExtensionController(
+        [NotNull] IDatabaseService databaseService,
+        [NotNull] ILogger<ExtensionController> logger,
+        IWebHostEnvironment environment,
+        IPackageReader manifestReader)
     {
         _databaseService = databaseService;
-        _extensionService = extensionService;
+        _logger = logger;
+        _environment = environment;
+        _manifestReader = manifestReader;
     }
     readonly IDatabaseService _databaseService;
-    readonly IExtensionService _extensionService;
+    readonly IPackageReader _manifestReader;
 
-    const string UploadDirectory = "./uploads";
-    const string OutputDirectory = "./output";
+    private readonly ILogger<ExtensionController> _logger;
+    private readonly IWebHostEnvironment _environment;
 }
