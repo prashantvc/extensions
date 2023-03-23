@@ -8,8 +8,8 @@ const AppRoutes = [
         element: <Extensions />,
     },
     {
-        path: "/details/:name/:version",
-        element: <Details />
+        path: "/details/:identifier/:version",
+        element: <Details/>
     }
 ];
 
