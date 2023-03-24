@@ -17,7 +17,7 @@
         "commands": [
             {
                 "command": "private-extensions.refresh",
-                "title": "Refresh Extension List",
+                "title": "Refresh Private Extensions List",
                 "icon": {
                     "light": "icons/light/refresh.svg",
                     "dark": "icons/dark/refresh.svg"
@@ -25,7 +25,7 @@
             },
             {
                 "command": "private-extensions.addSource",
-                "title": "Add Repository Source",
+                "title": "Add Private Repository Source",
                 "icon": {
                     "light": "icons/light/folder.svg",
                     "dark": "icons/dark/folder.svg"
@@ -52,17 +52,17 @@
         "viewsWelcome": [
             {
                 "view": "private-extensions",
-                "contents": "Hello configure your extension repository.  \n[Add Source](command:private-extensions.addSource)"
+                "contents": "Configure extension repository.  \n[Add Source](command:private-extensions.addSource)"
             }
         ],
         "configuration": [
             {
-                "title": "Repository Sources",
+                "title": "Private Extensions",
                 "properties": {
                     "privateExtensions.Source": {
                         "type": "array",
                         "order": 0,
-                        "description": "This is the list of extensions"
+                        "description": "This is the list of private extension repository sources."
                     }
                 }
             }

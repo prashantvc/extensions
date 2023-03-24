@@ -25,7 +25,7 @@ export class PackageWrapper {
     }
 
     public get packagePath(): string {
-        var packagePath = `${this.extensionPath()}.vsix`
+        var packagePath = `${this.extensionPath()}.vsix`;
         return packagePath;
     }
 
@@ -43,16 +43,12 @@ export class PackageWrapper {
     extensionPath(): string {
         var extensionPath = (this.extensionPackage.metadata.identity.targetPlatform !== null) ?
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}` :
-            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}`
+            `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}`;
 
         return extensionPath;
     }
 
-    public get Description(): string {
-        return this.extensionPackage.metadata.description;
-    }
-
-    extensionPackage: IPackage
+    extensionPackage: IPackage;
 }
 
 export interface Asset {

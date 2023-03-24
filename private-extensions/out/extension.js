@@ -11,7 +11,7 @@ function activate(context) {
     let addSource = vscode.commands.registerCommand("private-extensions.addSource", async () => {
         vscode.window
             .showInputBox({
-            placeHolder: "Enter the URL of the source",
+            placeHolder: "Enter the repository URL",
         })
             .then(async (url) => {
             if (url) {
@@ -19,6 +19,7 @@ function activate(context) {
                 await vscode.workspace
                     .getConfiguration("")
                     .update("privateExtensions.Source", [url], vscode.ConfigurationTarget.Global);
+                extensionDataProvider.refresh();
             }
         });
     });

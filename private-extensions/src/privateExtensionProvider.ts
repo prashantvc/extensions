@@ -1,25 +1,29 @@
 import axios from "axios";
 import * as vscode from "vscode";
-import { Data } from "./data";
+import { IPackage, PackageWrapper } from "./data";
 
-export class PrivateExtensionProvider implements vscode.TreeDataProvider<Data> {
-    getTreeItem(element: Data): vscode.TreeItem | Thenable<vscode.TreeItem> {
+export class PrivateExtensionProvider implements vscode.TreeDataProvider<PackageWrapper> {
+    getTreeItem(element: PackageWrapper): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return new ExtensionView(element);
     }
-    getChildren(element?: Data | undefined): vscode.ProviderResult<Data[]> {
+    getChildren(element?: PackageWrapper | undefined): vscode.ProviderResult<PackageWrapper[]> {
         return this.getExtensionData();
     }
 
-    async getExtensionData(): Promise<Data[]> {
-        const res = await axios.get<Data[]>(
-            "https://private-extensions.azurewebsites.net/api/extension"
-        );
+    async getExtensionData(): Promise<PackageWrapper[]> {
 
+        let url = getExtensionSource();
+        if (url === undefined || url === "") {
+            return [];
+        }
+    
+        const res = await axios.get<IPackage[]>(`${url}/extension`);
         if (res.status !== axios.HttpStatusCode.Ok) {
             return [];
         }
 
-        return res.data;
+        let packages = res.data.map(p => new PackageWrapper(p));
+        return packages;
     }
 
     refresh(): void {
@@ -27,15 +31,24 @@ export class PrivateExtensionProvider implements vscode.TreeDataProvider<Data> {
     }
 
     private _onDidChangeTreeData: vscode.EventEmitter<
-        Data | undefined | null | void
-    > = new vscode.EventEmitter<Data | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<Data | undefined | null | void> =
+    PackageWrapper | undefined | null | void
+    > = new vscode.EventEmitter<PackageWrapper | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<PackageWrapper | undefined | null | void> =
         this._onDidChangeTreeData.event;
 }
 
 class ExtensionView extends vscode.TreeItem {
-    constructor(public readonly extension: Data) {
+    constructor(public readonly extension: PackageWrapper) {
         super(extension.displayName, vscode.TreeItemCollapsibleState.None);
-        this.tooltip = `${extension.identifier}`;
+        this.id = extension.extensionPackage.identifier;
+        this.tooltip = `${extension.extensionPackage.identifier} - ${extension.extensionPackage.version}`;
+        this.description = extension.description;
     }
+}
+
+function getExtensionSource(): string {
+    let url = vscode.workspace
+        .getConfiguration("").get<string[]>("privateExtensions.Source");
+    
+    return (url) ? url[0] : "";
 }

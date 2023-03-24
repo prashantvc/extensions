@@ -2,7 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import axios from "axios";
 import * as vscode from "vscode";
-import { Data } from "./data";
 import { PrivateExtensionProvider } from "./privateExtensionProvider";
 
 // This method is called when your extension is activated
@@ -19,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
         async () => {
             vscode.window
                 .showInputBox({
-                    placeHolder: "Enter the URL of the source",
+                    placeHolder: "Enter the repository URL",
                 })
                 .then(async (url) => {
                     if (url) {
@@ -33,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 [url],
                                 vscode.ConfigurationTarget.Global
                             );
+                        extensionDataProvider.refresh();
                     }
                 });
         }
