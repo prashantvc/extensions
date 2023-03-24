@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { NavLink, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import { IPackage, PackageWrapper } from '../data/package';
 import { Avatar, Button, Divider, List, Space, Tag, Typography } from 'antd';
@@ -12,7 +12,6 @@ const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
   const [readme, setReadme] = useState('');
   const [packageInfo, setPackageInfo] = useState<PackageWrapper[]>();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -21,7 +20,6 @@ const DetailsPage = () => {
         const response = await fetch(`${packageData?.extensionPath}/extension/README.md`);
         const text = await response.text();
         setPackageInfo([packageData]);
-        setLoading(false);
         setReadme(text);
       } catch (error) {
         console.error(error);
@@ -57,8 +55,8 @@ const DetailsPage = () => {
         )
         }
       />
-      <Divider orientation='left'>Description</Divider>
-      <div>
+      <Divider/>
+      <div className='markdown-body'>
         <ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} skipHtml={true}/>
       </div>
     </div>

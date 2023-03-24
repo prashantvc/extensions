@@ -33,7 +33,7 @@ export class PackageWrapper {
         let path = this.extensionPackage.assets.find(a => a.assetType === "Microsoft.VisualStudio.Services.Icons.Default")?.path;
 
         if (path === undefined || path === null) {
-            return "favicon.ico";
+            return "default_icon_128.png";
         }
 
         var iconPath = `${this.extensionPath}/${path}`;
