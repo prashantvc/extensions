@@ -25,7 +25,7 @@ export class PackageWrapper {
     }
 
     public get packagePath(): string {
-        var packagePath = `${this.extensionPath()}.vsix`
+        var packagePath = `${this.extensionPath}.vsix`
         return packagePath;
     }
 
@@ -36,11 +36,11 @@ export class PackageWrapper {
             return "favicon.ico";
         }
 
-        var iconPath = `${this.extensionPath()}/${path}`;
+        var iconPath = `${this.extensionPath}/${path}`;
         return iconPath;
     }
 
-    extensionPath(): string {
+    public get extensionPath(): string {
         var extensionPath = (this.extensionPackage.metadata.identity.targetPlatform !== null) ?
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}` :
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}`

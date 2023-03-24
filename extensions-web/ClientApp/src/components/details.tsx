@@ -1,16 +1,32 @@
-import { FC } from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router-dom';
+import remarkGfm from 'remark-gfm'
+import { IPackage, PackageWrapper } from '../data/package';
 
-const Details: FC = () => {
-  const { identifier, version } = 
-    useParams<{ identifier: string, version: string }>();
+const DetailsPage = () => {
+  const { identifier, version } = useParams<{ identifier: string, version: string }>();
+  const [readme, setReadme] = useState('');
+  useEffect(() => {
+    getExtensionDetails(identifier, version).then(data => {
+      fetch(`${data?.extensionPath}/extension/Readme.md`)
+        .then(response => response.text())
+        .then(text => setReadme(text));
+    });
+  }, []);
 
   return (
-    <div>
-      <h1>{identifier}</h1>
-      <p>Version: {version}</p>
+    <div style={{ margin: '24px' }}>
+      <ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} />
     </div>
   );
 };
 
-export default Details;
+async function getExtensionDetails(identifier: string | undefined,
+  version: string | undefined) {
+  const response = await fetch(`extension/${identifier}/${version}`);
+  const data: IPackage = await response.json();
+  return new PackageWrapper(data);
+}
+
+export default DetailsPage;
