@@ -3,10 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import { IPackage, PackageWrapper } from '../data/package';
-import { Avatar, Button, Divider, List, Space, Tag, Typography } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
-
-const { Text } = Typography;
+import { Divider } from 'antd';
+import { PackageList } from './packageList';
 
 const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
@@ -30,31 +28,7 @@ const DetailsPage = () => {
 
   return (
     <div style={{ margin: '24px' }}>
-      <List itemLayout="horizontal" dataSource={packageInfo}
-        renderItem={(item, index) => (
-          <List.Item
-            actions={[
-              <Button size="middle" type="primary" href={item.packagePath} icon={<DownloadOutlined />}>Download</Button>
-            ]}>
-            <List.Item.Meta
-              avatar={
-                <Avatar
-                  size={{  lg: 80, xl: 80, xxl: 80 }}
-                  shape="square" src={item.iconPath} />
-              }
-              title={
-                <Space align="baseline">
-                  <h4>{item.displayName}</h4>
-                  <Text type="secondary">{item.extensionPackage.identifier}</Text>
-                  <Tag>v{item.extensionPackage.version}</Tag>
-                </Space>
-              }
-              description={item.description}
-            />
-          </List.Item>
-        )
-        }
-      />
+      <PackageList datasource={packageInfo!} />
       <Divider/>
       <div className='markdown-body'>
         <ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} skipHtml={true}/>

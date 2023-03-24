@@ -1,10 +1,10 @@
-import { Avatar, Divider, List, Space, Switch, Tag } from "antd";
+import { Divider, Space, Switch } from "antd";
 import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
-import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { UploadChangeParam } from "antd/es/upload/interface";
 import { IPackage, PackageWrapper } from "../data/package";
-import { NavLink } from "react-router-dom";
+import { PackageList } from "./packageList";
 
 const { Text } = Typography;
 
@@ -54,33 +54,7 @@ export class Extensions extends React.Component<
                     </Space>
                 </Space>
                 <Divider />
-                <List itemLayout="horizontal"
-                    dataSource={this.state.packages}
-                    renderItem={(item, index) => (
-                        <List.Item
-                            actions={[
-                                <Button size="small" type="primary" href={item.packagePath} icon={<DownloadOutlined />}>Download</Button>
-                            ]}>
-                            <List.Item.Meta
-                                avatar={
-                                    <Avatar shape="square" size="large" src={item.iconPath} />
-                                }
-                                title={
-                                    <Space align="center">
-                                        <NavLink to={`/details/${item.extensionPackage.identifier}/${item.extensionPackage.version}`}>
-                                            {item.displayName}
-                                        </NavLink>
-
-                                        <Text type="secondary">{item.extensionPackage.identifier}</Text>
-                                        <Tag>v{item.extensionPackage.version}</Tag>
-                                    </Space>
-
-                                }
-                                description={item.description}
-                            />
-                        </List.Item>
-                    )}
-                />
+                <PackageList datasource={this.state.packages} />
             </div>
         );
     }
@@ -88,8 +62,6 @@ export class Extensions extends React.Component<
     componentDidMount(): void {
         this.populateExtensions();
     }
-
-    
 
     async populateExtensions() {
         console.log("Populating extensions");
