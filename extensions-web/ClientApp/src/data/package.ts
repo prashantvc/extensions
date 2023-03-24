@@ -40,7 +40,12 @@ export class PackageWrapper {
         return iconPath;
     }
 
-    public get extensionPath(): string {
+    public get readmePath(): string {
+        let path = this.extensionPackage.assets.find(a => a.assetType === "Microsoft.VisualStudio.Services.Content.Details")?.path;
+        return this.extensionPath + "/" + path;
+    }
+
+    get extensionPath(): string {
         var extensionPath = (this.extensionPackage.metadata.identity.targetPlatform !== null) ?
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}@${this.extensionPackage.metadata.identity.targetPlatform}` :
             `output/${this.extensionPackage.identifier}-${this.extensionPackage.version}`
