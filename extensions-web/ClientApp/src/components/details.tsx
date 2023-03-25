@@ -1,14 +1,22 @@
-
-import { Dropdown, MenuProps, message } from 'antd';
+import { Divider, Dropdown, MenuProps, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { IPackage, PackageWrapper } from '../data/package';
 import { PackageDetails } from '../data/packageDetails';
+import remarkGfm from 'remark-gfm';
+import ReactMarkdown from 'react-markdown';
+import { PackageList } from './packageList';
+
+const { Text } = Typography;
+
 
 const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
   const [versions, setVersions] = useState<string[]>([]);
+  const [selectedPackage, setSelectedPackage] = useState<PackageWrapper | undefined>(undefined); // [1
   const [selectedVeresion, setSelectedVersion] = useState<string>(version ?? '');
+  const [readme, setReadme] = useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +24,14 @@ const DetailsPage = () => {
       try {
         const packageDetails = await getExtensionDetails(identifier, version);
         setVersions(packageDetails.versions);
+
+        if (version !== undefined) {
+          const response = await fetch(packageDetails.getPayload(version)?.readmePath ?? '');
+          const fileContent = await response.text();
+          setReadme(fileContent);
+          setSelectedPackage(packageDetails.getPayload(version));
+        }
+
       } catch (error) {
         console.error(error);
       }
@@ -38,20 +54,27 @@ const DetailsPage = () => {
     navigate(`/details/${identifier}/${key}`);
   };
 
+  const packageList = selectedPackage === undefined ? [] : [selectedPackage];
+
   return (
     <div style={{ margin: '24px' }}>
-      <Dropdown.Button menu={{
-        items,
-        selectable: true,
-        defaultSelectedKeys: [version!],
-        onClick
-      }}>
-        v{version}
-      </Dropdown.Button>
-
-      <h1>{identifier}</h1>
-      <h2>{version}</h2>
+      <PackageList datasource={packageList} />
+      <Divider />
+      <Space direction="horizontal">
+        <Text>Version(s):</Text>
+        <Dropdown.Button title="Versions" menu={{
+          items,
+          selectable: true,
+          defaultSelectedKeys: [version!],
+          onClick
+        }}>v{version}</Dropdown.Button>
+      </Space>
+      <Divider />
+      <div className='markdown-body'>
+        <ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} skipHtml={true} />
+      </div>
     </div>
+
   );
 }
 
