@@ -1,24 +1,21 @@
-import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { useParams } from 'react-router-dom';
-import remarkGfm from 'remark-gfm';
+
+import { Dropdown, MenuProps, message } from 'antd';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { IPackage, PackageWrapper } from '../data/package';
-import { Divider } from 'antd';
-import { PackageList } from './packageList';
+import { PackageDetails } from '../data/packageDetails';
 
 const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
-  const [readme, setReadme] = useState('');
-  const [packageInfo, setPackageInfo] = useState<PackageWrapper[]>();
+  const [versions, setVersions] = useState<string[]>([]);
+  const [selectedVeresion, setSelectedVersion] = useState<string>(version ?? '');
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const packageData = await getExtensionDetails(identifier, version);
-        const response = await fetch(`${packageData?.extensionPath}/extension/README.md`);
-        const text = await response.text();
-        setPackageInfo([packageData]);
-        setReadme(text);
+        const packageDetails = await getExtensionDetails(identifier, version);
+        setVersions(packageDetails.versions);
       } catch (error) {
         console.error(error);
       }
@@ -26,22 +23,43 @@ const DetailsPage = () => {
     fetchData();
   }, [identifier, version]);
 
+  const items: MenuProps['items'] = versions.map((v) => {
+    return {
+      key: v,
+      label: `v${v}`,
+    }
+  });
+
+  const onClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === selectedVeresion) {
+      return;
+    }
+    setSelectedVersion(key);
+    navigate(`/details/${identifier}/${key}`);
+  };
+
   return (
     <div style={{ margin: '24px' }}>
-      <PackageList datasource={packageInfo!} />
-      <Divider/>
-      <div className='markdown-body'>
-        <ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} skipHtml={true}/>
-      </div>
+      <Dropdown.Button menu={{
+        items,
+        selectable: true,
+        defaultSelectedKeys: [version!],
+        onClick
+      }}>
+        v{version}
+      </Dropdown.Button>
+
+      <h1>{identifier}</h1>
+      <h2>{version}</h2>
     </div>
   );
-};
+}
 
 async function getExtensionDetails(identifier: string | undefined,
   version: string | undefined) {
   const response = await fetch(`extension/${identifier}/${version}`);
-  const data: IPackage = await response.json();
-  return new PackageWrapper(data);
+  const data: IPackage[] = await response.json();
+  return new PackageDetails(identifier!, version!, data);
 }
 
 export default DetailsPage;

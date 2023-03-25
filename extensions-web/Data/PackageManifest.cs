@@ -12,6 +12,7 @@ public class PackageManifest
     public bool IsPreRelease { get; set; }
 
     public string Version => Metadata.Identity.Version;
+    public string Target => Metadata!.Identity!.TargetPlatform ?? "Any";
 }
 
 public class Metadata

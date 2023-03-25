@@ -12,7 +12,10 @@ public class DatabaseService : IDatabaseService
             throw new InvalidOperationException("Version is not SemVer compliant.");
         }
 
-        return Packages.Insert(package);
+        var pkg = Packages.Insert(package);
+        Packages.EnsureIndex(p => p.Identifier);
+
+        return pkg;
     }
 
     bool ValidateVersion(PackageManifest package)
@@ -26,11 +29,11 @@ public class DatabaseService : IDatabaseService
     public ILiteCollection<PackageManifest> Packages =>
         _database.GetCollection<PackageManifest>("packages");
 
-     public DatabaseService(ILiteDbContext liteDbContext)
+    public DatabaseService(ILiteDbContext liteDbContext)
     {
         _database = liteDbContext.Database;
 
     }
-    
+
     readonly LiteDatabase _database;
 }
