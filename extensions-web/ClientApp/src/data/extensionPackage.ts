@@ -1,21 +1,21 @@
-import { IExtension, ExtensionWrapper } from "./package";
+import { IExtension, Extension } from "./extension";
 
 export class ExtensionPackage {
     identifier: string;
     version: string;
-    extensions: ExtensionWrapper[];
+    extensions: Extension[];
 
     constructor(identifier: string, version: string, extensions: IExtension[]) {
         this.identifier = identifier;
         this.version = version;
-        this.extensions = extensions.map(p => new ExtensionWrapper(p));
+        this.extensions = extensions.map(p => new Extension(p));
     }
 
-    public get mainExtension(): ExtensionWrapper {
+    public get mainExtension(): Extension {
         return this.extensions[0];
     }
 
-    public extention(version: string, target: string | undefined = undefined): ExtensionWrapper | undefined {
+    public extention(version: string, target: string | undefined = undefined): Extension | undefined {
         if (target !== undefined) {
             let exts = this.extensions
                 .find(p => p.extension.version === version && p.extension.target === target);
@@ -42,6 +42,4 @@ export class ExtensionPackage {
         return this.extensions.filter(p => p.extension.metadata.identity.targetPlatform !== null)
             .map(p => p.extension.metadata.identity.targetPlatform);
     }
-
-
 }

@@ -1,16 +1,15 @@
 import { DownloadOutlined, DownOutlined } from "@ant-design/icons";
 import { Button, Dropdown, MenuProps } from "antd";
 import { useEffect, useState } from "react";
-import { ExtensionWrapper } from "../../data/package";
+import { Extension } from "../../data/extension";
 
-export const DownloadButton = ({ item }: { item: ExtensionWrapper }) => {
+export const DownloadButton = ({ item }: { item: Extension }) => {
     const [targets, setTargets] = useState<string[]>([]);
     useEffect(() => {
         async function fetchData() {
             const targets = await getExtensionDetails(
                 item.extension.identifier,
                 item.extension.version);
-            console.log(targets.length);
             setTargets(targets);
         }
         fetchData();

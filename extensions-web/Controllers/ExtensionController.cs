@@ -78,18 +78,20 @@ public class ExtensionController : ControllerBase
         System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
 
-    List<ExtensionManifest> GetPreReleasePackages(bool prerelease)
+    IList<ExtensionPackage> GetPreReleasePackages(bool prerelease)
     {
         var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
         : _databaseService.Packages.Find(p => !p.IsPreRelease).ToList();
 
-        var mylist = packagesList.GroupBy(p => p.Identifier).Select(x =>
-             x.Where(r => r.Identifier == x.Key)
-                .OrderByDescending(r => GetVersion(r.Version))
-                .FirstOrDefault()
-        ).ToList();
+        var extensionPackages = packagesList.GroupBy(p => p.Identifier)
+        .Select(x =>
+            new ExtensionPackage(x.Key,
+                x.Where(r => r.Identifier == x.Key)
+                    .OrderByDescending(r => GetVersion(r.Version))
+                    .ToList()
+            )).ToList();
 
-        return mylist;
+        return extensionPackages;
     }
 
     string CreateOrGetUloadDirectory()

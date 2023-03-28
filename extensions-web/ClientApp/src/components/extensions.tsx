@@ -3,15 +3,16 @@ import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { UploadChangeParam } from "antd/es/upload/interface";
-import { IExtension, ExtensionWrapper } from "../data/package";
+import { Extension, IExtension } from "../data/extension";
 import { PackageList } from "./packageList";
+import { ExtensionPackage } from "../data/extensionPackage";
 
 const { Text } = Typography;
 
 export class Extensions extends React.Component<
     {},
     {
-        extensions: ExtensionWrapper[];
+        extensions: Extension[];
         loading: boolean;
         showPrerelease: boolean;
     }
@@ -75,9 +76,11 @@ export class Extensions extends React.Component<
             return;
         }
 
-        const extensionResponse: IExtension[] = await response.json();
-        const localExtensions = extensionResponse.map(p => new ExtensionWrapper(p))
+        const extensionResponse: [{ identier: string, extensions: IExtension[] }]
+            = await response.json();
 
-        this.setState({ extensions: localExtensions, loading: false });
+        const localExtensions = extensionResponse
+            .map((p) => new ExtensionPackage(p.identier, "", p.extensions));
+        this.setState({ extensions: localExtensions.map(p => p.mainExtension), loading: false });
     }
 }

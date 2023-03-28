@@ -18,7 +18,7 @@ export interface IExtension {
     relativeReadmePath: string;
 }
 
-export class ExtensionWrapper {
+export class Extension {
     constructor(extensionPackage: IExtension) {
         this.extension = extensionPackage;
     }

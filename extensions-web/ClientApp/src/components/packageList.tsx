@@ -1,12 +1,12 @@
 import { Avatar, List, Space, Tag, Typography } from "antd";
 import { NavLink } from "react-router-dom";
-import { ExtensionWrapper } from "../data/package";
+import { Extension } from "../data/extension";
 import { DownloadButton } from "./view/downloadButton";
 
 const { Text } = Typography;
 
 // package list FC component
-export const PackageList = ({ datasource }: { datasource: ExtensionWrapper[] }) => {
+export const PackageList = ({ datasource }: { datasource: Extension[] }) => {
     return (
         <List itemLayout="horizontal"
             dataSource={datasource}
