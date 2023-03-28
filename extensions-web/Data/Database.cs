@@ -4,7 +4,7 @@ using Semver;
 public class DatabaseService : IDatabaseService
 {
 
-    public BsonValue InsertPackage(PackageManifest package)
+    public BsonValue InsertPackage(ExtensionManifest package)
     {
         bool success = ValidateVersion(package);
         if (!success)
@@ -18,7 +18,7 @@ public class DatabaseService : IDatabaseService
         return pkg;
     }
 
-    bool ValidateVersion(PackageManifest package)
+    bool ValidateVersion(ExtensionManifest package)
     {
         bool success = SemVersion.TryParse(package.Version, SemVersionStyles.Strict, out var version);
         package.IsPreRelease = version.IsPrerelease;
@@ -26,8 +26,8 @@ public class DatabaseService : IDatabaseService
     }
 
 
-    public ILiteCollection<PackageManifest> Packages =>
-        _database.GetCollection<PackageManifest>("packages");
+    public ILiteCollection<ExtensionManifest> Packages =>
+        _database.GetCollection<ExtensionManifest>("packages");
 
     public DatabaseService(ILiteDbContext liteDbContext)
     {

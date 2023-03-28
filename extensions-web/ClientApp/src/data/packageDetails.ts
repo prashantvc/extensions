@@ -1,50 +1,41 @@
-import { IPackage, PackageWrapper } from "./package";
+import { IExtension, ExtensionWrapper } from "./package";
 
-export class PackageDetails {
+export class ExtensionPackage {
     identifier: string;
     version: string;
-    packages: IPackage[];
+    extensions: ExtensionWrapper[];
 
-    constructor(identifier: string, version: string, payloads: IPackage[]) {
+    constructor(identifier: string, version: string, extensions: IExtension[]) {
         this.identifier = identifier;
         this.version = version;
-        this.packages = payloads;
+        this.extensions = extensions.map(p => new ExtensionWrapper(p));
     }
 
-    public get mainPayload(): PackageWrapper {
-        return new PackageWrapper(this.packages[0]);
+    public get mainExtension(): ExtensionWrapper {
+        return this.extensions[0];
     }
 
-    public get payloads(): PackageWrapper[] {
-        return this.packages.map(p => new PackageWrapper(p));
-    }
-
-    public getPayload(version: string): PackageWrapper | undefined {
-        let payload = this.packages.find(
-            p => p.version === version
+    public extention(version: string, target: string = "Any"): ExtensionWrapper | undefined {
+        let payload = this.extensions.find(
+            p => p.extension.version === version && p.extension.target === target
         );
 
-        return (payload === undefined) ? undefined : new PackageWrapper(payload);
+        return (payload === undefined) ? undefined : payload;
     }
 
     public get versions(): string[] {
-        return this.packages.map(p => p.version);
+        return this.extensions.map(p => p.extension.version);
     }
 
     public get uniqueVersions(): string[] {
-        let versions = this.packages.map(p => p.version);
+        let versions = this.extensions.map(p => p.extension.version);
         return versions.filter((v, i, a) => a.indexOf(v) === i);
     }
 
     public get targets(): string[] {
-        return this.payloads.filter(p => p.extensionPackage.metadata.identity.targetPlatform !== null)
-            .map(p => p.extensionPackage.metadata.identity.targetPlatform);
+        return this.extensions.filter(p => p.extension.metadata.identity.targetPlatform !== null)
+            .map(p => p.extension.metadata.identity.targetPlatform);
     }
 
-    public payload(version: string, platform: string): PackageWrapper | undefined {
-        let payloads = this.payloads.find(
-            p => p.extensionPackage.version === version
-        );
-        return payloads;
-    }
+
 }

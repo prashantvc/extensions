@@ -1,8 +1,8 @@
 import { Divider, Dropdown, MenuProps, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { IPackage, PackageWrapper } from '../data/package';
-import { PackageDetails } from '../data/packageDetails';
+import { IExtension, ExtensionWrapper } from '../data/package';
+import { ExtensionPackage } from '../data/packageDetails';
 import remarkGfm from 'remark-gfm';
 import ReactMarkdown from 'react-markdown';
 import { PackageList } from './packageList';
@@ -13,7 +13,7 @@ const { Text } = Typography;
 const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
   const [uniqueVersions, setUniqueVersions] = useState<string[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<PackageWrapper | undefined>(undefined); // [1
+  const [selectedPackage, setSelectedPackage] = useState<ExtensionWrapper | undefined>(undefined); // [1
   const [selectedVeresion, setSelectedVersion] = useState<string>(version ?? '');
   const [readme, setReadme] = useState('');
 
@@ -26,10 +26,10 @@ const DetailsPage = () => {
         setUniqueVersions(packageDetails.uniqueVersions);
 
         if (version !== undefined) {
-          const response = await fetch(packageDetails.getPayload(version)?.readmePath ?? '');
+          const response = await fetch(packageDetails.extention(version)?.readmePath ?? '');
           const fileContent = await response.text();
           setReadme(fileContent);
-          setSelectedPackage(packageDetails.getPayload(version));
+          setSelectedPackage(packageDetails.extention(version));
         }
 
       } catch (error) {
@@ -82,8 +82,8 @@ const DetailsPage = () => {
 async function getExtensionDetails(identifier: string | undefined,
   version: string | undefined) {
   const response = await fetch(`extension/${identifier}/${version}`);
-  const data: IPackage[] = await response.json();
-  return new PackageDetails(identifier!, version!, data);
+  const data: IExtension[] = await response.json();
+  return new ExtensionPackage(identifier!, version!, data);
 }
 
 export default DetailsPage;

@@ -4,22 +4,22 @@ using System.Xml.Serialization;
 public interface IPackageReader
 {
     string ExtractFile(string fileOnServer, string extractFileName);
-    PackageManifest ExtractPackage(string fileOnServer);
+    ExtensionManifest ExtractPackage(string fileOnServer);
 
     public string CreateOrGetOutputDirectory();
 }
 
 public class PackageReader : IPackageReader
 {
-    public PackageManifest ExtractPackage(string fileOnServer)
+    public ExtensionManifest ExtractPackage(string fileOnServer)
     {
         string outputFilePath = ExtractFile(fileOnServer, "extension.vsixmanifest");
-        PackageManifest? packageManifest = default(PackageManifest);
+        ExtensionManifest? packageManifest = default(ExtensionManifest);
 
-        var serializer = new XmlSerializer(typeof(PackageManifest));
+        var serializer = new XmlSerializer(typeof(ExtensionManifest));
         using (StringReader stream = new StringReader(File.ReadAllText(outputFilePath)))
         {
-            packageManifest = serializer.Deserialize(stream) as PackageManifest;
+            packageManifest = serializer.Deserialize(stream) as ExtensionManifest;
             var assets = packageManifest?.Assets;
 
             foreach (var asset in assets)

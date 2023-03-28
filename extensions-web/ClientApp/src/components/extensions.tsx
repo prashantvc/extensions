@@ -3,7 +3,7 @@ import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { UploadChangeParam } from "antd/es/upload/interface";
-import { IPackage, PackageWrapper } from "../data/package";
+import { IExtension, ExtensionWrapper } from "../data/package";
 import { PackageList } from "./packageList";
 
 const { Text } = Typography;
@@ -11,7 +11,7 @@ const { Text } = Typography;
 export class Extensions extends React.Component<
     {},
     {
-        packages: PackageWrapper[];
+        extensions: ExtensionWrapper[];
         loading: boolean;
         showPrerelease: boolean;
     }
@@ -38,7 +38,7 @@ export class Extensions extends React.Component<
 
     constructor(props: any) {
         super(props);
-        this.state = { packages: [], loading: true, showPrerelease: false };
+        this.state = { extensions: [], loading: true, showPrerelease: false };
     }
 
     public render() {
@@ -54,7 +54,7 @@ export class Extensions extends React.Component<
                     </Space>
                 </Space>
                 <Divider />
-                <PackageList datasource={this.state.packages} />
+                <PackageList datasource={this.state.extensions} />
             </div>
         );
     }
@@ -69,9 +69,15 @@ export class Extensions extends React.Component<
 
         console.log(`extension?prerelease=${this.state.showPrerelease}`);
         const response = await fetch(`extension?prerelease=${this.state.showPrerelease}`);
-        const extensionData: IPackage[] = await response.json();
-        const packages = extensionData.map(p => new PackageWrapper(p))
+        if (response.status === 204) {
+            console.log(response);
+            this.setState({ extensions: [], loading: false });
+            return;
+        }
 
-        this.setState({ packages: packages, loading: false });
+        const extensionResponse: IExtension[] = await response.json();
+        const localExtensions = extensionResponse.map(p => new ExtensionWrapper(p))
+
+        this.setState({ extensions: localExtensions, loading: false });
     }
 }

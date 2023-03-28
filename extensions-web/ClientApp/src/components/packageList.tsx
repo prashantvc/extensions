@@ -1,12 +1,12 @@
 import { Avatar, List, Space, Tag, Typography } from "antd";
 import { NavLink } from "react-router-dom";
-import { PackageWrapper } from "../data/package";
+import { ExtensionWrapper } from "../data/package";
 import { DownloadButton } from "./view/downloadButton";
 
 const { Text } = Typography;
 
 // package list FC component
-export const PackageList = ({ datasource }: { datasource: PackageWrapper[] }) => {
+export const PackageList = ({ datasource }: { datasource: ExtensionWrapper[] }) => {
     return (
         <List itemLayout="horizontal"
             dataSource={datasource}
@@ -22,15 +22,15 @@ export const PackageList = ({ datasource }: { datasource: PackageWrapper[] }) =>
                         title={
                             <Space direction="vertical" size='small'>
                                 <Space align="center">
-                                    <NavLink to={`/details/${item.extensionPackage.identifier}/${item.extensionPackage.version}`}>
-                                        {item.displayName}
+                                    <NavLink to={`/details/${item.extension.identifier}/${item.extension.version}`}>
+                                        {item.extension.displayName}
                                     </NavLink>
-                                    <Tag>v{item.extensionPackage.version}</Tag>
+                                    <Tag>v{item.extension.version}</Tag>
                                 </Space>
-                                <Text type="secondary">{item.extensionPackage.identifier}</Text>
+                                <Text type="secondary">{item.extension.identifier}</Text>
                             </Space>
                         }
-                        description={item.description}
+                        description={item.extension.description}
                     />
                 </List.Item>
             )}

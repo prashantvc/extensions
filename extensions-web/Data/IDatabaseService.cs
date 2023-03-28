@@ -2,6 +2,6 @@ using LiteDB;
 
 public interface IDatabaseService
 {
-    public ILiteCollection<PackageManifest> Packages { get; }
-    BsonValue InsertPackage(PackageManifest package);
+    public ILiteCollection<ExtensionManifest> Packages { get; }
+    BsonValue InsertPackage(ExtensionManifest package);
 }

@@ -23,7 +23,7 @@ public class ExtensionController : ControllerBase
     {
         var packages = _databaseService.Packages
            .Find(p => p.Identifier == id)
-           .OrderByDescending(p => p.Version);
+             .OrderByDescending(r => GetVersion(r.Version));
 
         return Ok(packages);
     }
@@ -78,14 +78,14 @@ public class ExtensionController : ControllerBase
         System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
 
-    List<PackageManifest> GetPreReleasePackages(bool prerelease)
+    List<ExtensionManifest> GetPreReleasePackages(bool prerelease)
     {
         var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
         : _databaseService.Packages.Find(p => !p.IsPreRelease).ToList();
 
         var mylist = packagesList.GroupBy(p => p.Identifier).Select(x =>
              x.Where(r => r.Identifier == x.Key)
-                .OrderByDescending(r => r.Version)
+                .OrderByDescending(r => GetVersion(r.Version))
                 .FirstOrDefault()
         ).ToList();
 
@@ -102,6 +102,16 @@ public class ExtensionController : ControllerBase
         }
 
         return uploadDirectory;
+    }
+
+    SemVersion GetVersion(string version)
+    {
+        var ver = SemVersion.Parse("0.0.0", SemVersionStyles.Any);
+        if (string.IsNullOrWhiteSpace(version))
+            return ver;
+
+        SemVersion.TryParse(version, SemVersionStyles.Any, out ver);
+        return ver;
     }
 
     public ExtensionController(
