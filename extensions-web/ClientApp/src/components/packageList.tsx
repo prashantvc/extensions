@@ -1,7 +1,7 @@
-import { DownloadOutlined } from "@ant-design/icons";
-import { Avatar, Button, List, Space, Tag, Typography } from "antd";
+import { Avatar, List, Space, Tag, Typography } from "antd";
 import { NavLink } from "react-router-dom";
 import { PackageWrapper } from "../data/package";
+import { DownloadButton } from "./view/downloadButton";
 
 const { Text } = Typography;
 
@@ -13,7 +13,7 @@ export const PackageList = ({ datasource }: { datasource: PackageWrapper[] }) =>
             renderItem={(item, index) => (
                 <List.Item
                     actions={[
-                        <Button size="small" type="primary" href={item.packagePath} icon={<DownloadOutlined />}>Download</Button>
+                        <DownloadButton item={item} />
                     ]}>
                     <List.Item.Meta
                         avatar={

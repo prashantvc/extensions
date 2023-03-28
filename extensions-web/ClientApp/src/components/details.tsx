@@ -12,7 +12,7 @@ const { Text } = Typography;
 
 const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
-  const [versions, setVersions] = useState<string[]>([]);
+  const [uniqueVersions, setUniqueVersions] = useState<string[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageWrapper | undefined>(undefined); // [1
   const [selectedVeresion, setSelectedVersion] = useState<string>(version ?? '');
   const [readme, setReadme] = useState('');
@@ -23,7 +23,7 @@ const DetailsPage = () => {
     async function fetchData() {
       try {
         const packageDetails = await getExtensionDetails(identifier, version);
-        setVersions(packageDetails.versions);
+        setUniqueVersions(packageDetails.uniqueVersions);
 
         if (version !== undefined) {
           const response = await fetch(packageDetails.getPayload(version)?.readmePath ?? '');
@@ -40,7 +40,7 @@ const DetailsPage = () => {
   }, [identifier, version]);
 
   //get unique values
-  const items: MenuProps['items'] = Array.from(new Set(versions))
+  const items: MenuProps['items'] = uniqueVersions
     .map((v) => {
       return {
         key: v,
@@ -76,7 +76,6 @@ const DetailsPage = () => {
         <ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} skipHtml={true} />
       </div>
     </div>
-
   );
 }
 

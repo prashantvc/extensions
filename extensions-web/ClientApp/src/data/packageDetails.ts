@@ -31,6 +31,16 @@ export class PackageDetails {
         return this.packages.map(p => p.version);
     }
 
+    public get uniqueVersions(): string[] {
+        let versions = this.packages.map(p => p.version);
+        return versions.filter((v, i, a) => a.indexOf(v) === i);
+    }
+
+    public get targets(): string[] {
+        return this.payloads.filter(p => p.extensionPackage.metadata.identity.targetPlatform !== null)
+            .map(p => p.extensionPackage.metadata.identity.targetPlatform);
+    }
+
     public payload(version: string, platform: string): PackageWrapper | undefined {
         let payloads = this.payloads.find(
             p => p.extensionPackage.version === version

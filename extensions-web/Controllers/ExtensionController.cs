@@ -28,6 +28,19 @@ public class ExtensionController : ControllerBase
         return Ok(packages);
     }
 
+    [HttpGet]
+    [Route("targets/{id}/{version?}")]
+    public IActionResult GetTargets(string id, string version = "")
+    {
+        var targets = _databaseService.Packages
+           .Find(p => p.Identifier == id && p.Version == version)
+           .Where(p => p.Metadata.Identity.TargetPlatform != null)
+           .Select(p => p.Metadata.Identity.TargetPlatform)
+           .ToList();
+
+        return Ok(targets);
+    }
+
     [HttpPost, DisableRequestSizeLimit]
     public async Task<IActionResult> AddExtensionsAsync(IFormFile file)
     {
