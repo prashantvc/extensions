@@ -11,7 +11,7 @@ public class ExtensionController : ControllerBase
     {
         var packagesList = GetPreReleasePackages(prerelease);
 
-        if (packagesList.Count <= 0)
+        if (packagesList.Count() <= 0)
             return NoContent();
 
         return Ok(packagesList);
@@ -78,18 +78,16 @@ public class ExtensionController : ControllerBase
         System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
 
-    IList<ExtensionPackage> GetPreReleasePackages(bool prerelease)
+    IEnumerable<ExtensionPackage> GetPreReleasePackages(bool prerelease)
     {
         var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
         : _databaseService.Packages.Find(p => !p.IsPreRelease).ToList();
 
-        var extensionPackages = packagesList.GroupBy(p => p.Identifier)
+        var extensionPackages = packagesList.GroupBy(p => new { p.Identifier, p.Version })
         .Select(x =>
-            new ExtensionPackage(x.Key,
-                x.Where(r => r.Identifier == x.Key)
-                    .OrderByDescending(r => GetVersion(r.Version))
-                    .ToList()
-            )).ToList();
+            new ExtensionPackage(x.Key.Identifier, x.Key.Version,
+                x.Where(r => r.Identifier == x.Key.Identifier).ToList()
+            )).OrderByDescending(r => GetVersion(r.Version));
 
         return extensionPackages;
     }

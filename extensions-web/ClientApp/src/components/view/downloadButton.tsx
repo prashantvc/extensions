@@ -1,30 +1,20 @@
 import { DownloadOutlined, DownOutlined } from "@ant-design/icons";
 import { Button, Dropdown, MenuProps } from "antd";
-import { useEffect, useState } from "react";
 import { Extension } from "../../data/extension";
 
-export const DownloadButton = ({ item }: { item: Extension }) => {
-    const [targets, setTargets] = useState<string[]>([]);
-    useEffect(() => {
-        async function fetchData() {
-            const targets = await getExtensionDetails(
-                item.extension.identifier,
-                item.extension.version);
-            setTargets(targets);
-        }
-        fetchData();
-    }, [item]);
+export const DownloadButton = ({ extensions }: { extensions: Extension[] }) => {
 
-    const items: MenuProps['items'] = targets.map((t) => {
+
+    const items: MenuProps['items'] = extensions.map((t) => {
         return {
-            key: t,
-            label: t,
+            key: t.extension.target,
+            label: t.extension.target,
         }
     });
 
-    if (targets.length <= 1) {
+    if (extensions.length <= 1) {
         return (
-            <Button size="small" type="primary" href={item.packagePath}>Download <DownloadOutlined /></Button>
+            <Button size="small" type="primary" href={extensions[0].extensionPath}>Download <DownloadOutlined /></Button>
         );
     } else {
         return (
@@ -38,11 +28,4 @@ export const DownloadButton = ({ item }: { item: Extension }) => {
                 }}>Download</Dropdown.Button>
         );
     }
-}
-
-async function getExtensionDetails(identifier: string | undefined,
-    version: string | undefined) {
-    const response = await fetch(`extension/targets/${identifier}/${version}`);
-    const data: string[] = await response.json();
-    return data;
 }

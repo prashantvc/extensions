@@ -1,7 +1,7 @@
 import { Divider, Dropdown, MenuProps, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { IExtension, Extension } from '../data/extension';
+import { IExtension } from '../data/extension';
 import { ExtensionPackage } from '../data/extensionPackage';
 import remarkGfm from 'remark-gfm';
 import ReactMarkdown from 'react-markdown';
@@ -13,9 +13,9 @@ const { Text } = Typography;
 const DetailsPage = () => {
   const { identifier, version } = useParams<{ identifier: string, version: string }>();
   const [uniqueVersions, setUniqueVersions] = useState<string[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<Extension | undefined>(undefined); // [1
   const [selectedVeresion, setSelectedVersion] = useState<string>(version ?? '');
   const [readme, setReadme] = useState('');
+  const [extensionPackage, setExtensionPackage] = useState<ExtensionPackage | undefined>(undefined);
 
   const navigate = useNavigate();
 
@@ -23,13 +23,13 @@ const DetailsPage = () => {
     async function fetchData() {
       try {
         const packageDetails = await getExtensionDetails(identifier, version);
+        setExtensionPackage(packageDetails);
         setUniqueVersions(packageDetails.uniqueVersions);
 
         if (version !== undefined) {
           const response = await fetch(packageDetails.extention(version)?.readmePath ?? '');
           const fileContent = await response.text();
           setReadme(fileContent);
-          setSelectedPackage(packageDetails.extention(version));
         }
 
       } catch (error) {
@@ -56,11 +56,9 @@ const DetailsPage = () => {
     navigate(`/details/${identifier}/${key}`);
   };
 
-  const packageList = selectedPackage === undefined ? [] : [selectedPackage];
-
   return (
     <div style={{ margin: '24px' }}>
-      <PackageList datasource={packageList} />
+      <PackageList datasource={extensionPackage ? [extensionPackage] : []} />
       <Divider />
       <Space direction="horizontal">
         <Text>Version(s):</Text>

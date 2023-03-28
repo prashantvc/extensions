@@ -12,7 +12,7 @@ const { Text } = Typography;
 export class Extensions extends React.Component<
     {},
     {
-        extensions: Extension[];
+        extensions: ExtensionPackage[];
         loading: boolean;
         showPrerelease: boolean;
     }
@@ -75,12 +75,21 @@ export class Extensions extends React.Component<
             this.setState({ extensions: [], loading: false });
             return;
         }
-
-        const extensionResponse: [{ identier: string, extensions: IExtension[] }]
+        type res = { identifier: string, version: string, extensions: IExtension[] };
+        const extensionResponse: [res]
             = await response.json();
 
-        const localExtensions = extensionResponse
-            .map((p) => new ExtensionPackage(p.identier, "", p.extensions));
-        this.setState({ extensions: localExtensions.map(p => p.mainExtension), loading: false });
+        let uniqueExtensions = extensionResponse.reduce((acc: res[], curr: res) => {
+            if (acc.find((p) => p.identifier === curr.identifier)) {
+                return acc;
+            }
+            return [...acc, curr];
+        }, []);
+
+        console.info(uniqueExtensions);
+
+        const localExtensions = uniqueExtensions
+            .map((p) => new ExtensionPackage(p.identifier, p.version, p.extensions));
+        this.setState({ extensions: localExtensions, loading: false });
     }
 }

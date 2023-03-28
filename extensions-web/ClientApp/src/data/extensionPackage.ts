@@ -15,6 +15,10 @@ export class ExtensionPackage {
         return this.extensions[0];
     }
 
+    public get description(): string {
+        return this.mainExtension.extension.description;
+    }
+
     public extention(version: string, target: string | undefined = undefined): Extension | undefined {
         if (target !== undefined) {
             let exts = this.extensions
