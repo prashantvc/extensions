@@ -39,12 +39,14 @@ const DetailsPage = () => {
     fetchData();
   }, [identifier, version]);
 
-  const items: MenuProps['items'] = versions.map((v) => {
-    return {
-      key: v,
-      label: `v${v}`,
-    }
-  });
+  //get unique values
+  const items: MenuProps['items'] = Array.from(new Set(versions))
+    .map((v) => {
+      return {
+        key: v,
+        label: `v${v}`,
+      }
+    });
 
   const onClick: MenuProps['onClick'] = ({ key }) => {
     if (key === selectedVeresion) {
