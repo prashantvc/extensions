@@ -15,11 +15,17 @@ export class ExtensionPackage {
         return this.extensions[0];
     }
 
-    public extention(version: string, target: string = "Any"): ExtensionWrapper | undefined {
-        let payload = this.extensions.find(
-            p => p.extension.version === version && p.extension.target === target
-        );
+    public extention(version: string, target: string | undefined = undefined): ExtensionWrapper | undefined {
+        if (target !== undefined) {
+            let exts = this.extensions
+                .find(p => p.extension.version === version && p.extension.target === target);
 
+            return (exts === undefined) ? undefined : exts;
+        }
+
+        let payload = this.extensions.find(
+            p => p.extension.version === version
+        );
         return (payload === undefined) ? undefined : payload;
     }
 
