@@ -22,7 +22,7 @@ public class ExtensionController : ControllerBase
     public IActionResult GetExtension(string id, string version = "", bool prerelease = false)
     {
         var packages = _databaseService.Packages
-           .Find(p => p.Identifier == id && p.Version == version)
+           .Find(p => p.Identifier == id)
              .OrderByDescending(r => GetVersion(r.Version));
 
         return Ok(packages);

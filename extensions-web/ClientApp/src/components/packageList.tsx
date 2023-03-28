@@ -1,12 +1,20 @@
 import { Avatar, List, Space, Tag, Typography } from "antd";
 import { NavLink } from "react-router-dom";
+import { Extension } from "../data/extension";
 import { ExtensionPackage } from "../data/extensionPackage";
 import { DownloadButton } from "./view/downloadButton";
 
 const { Text } = Typography;
 
 // package list FC component
-export const PackageList = ({ datasource }: { datasource: ExtensionPackage[] | undefined }) => {
+export const PackageList = ({ datasource, version }: { datasource: ExtensionPackage[] | undefined, version?: string }) => {
+
+    const getDownloadItems = (items: Extension[]) => {
+        if (version !== undefined) {
+            return items.filter((item) => item.extension.version === version);
+        }
+        return items
+    };
 
     return (
         <List itemLayout="horizontal"
@@ -14,7 +22,7 @@ export const PackageList = ({ datasource }: { datasource: ExtensionPackage[] | u
             renderItem={(item, index) => (
                 <List.Item
                     actions={[
-                        <DownloadButton extensions={item.extensions} />
+                        <DownloadButton extensions={getDownloadItems(item.extensions)} />
                     ]}>
                     <List.Item.Meta
                         avatar={
