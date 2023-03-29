@@ -14,7 +14,6 @@ With private extension repository, you can ensure that your extensions are secur
 ## Instruction
 
 1. Fork the repository
-2. Switch to `react-client` branch
 3. Run `npm i`
 4. Finally, `dotnet run`
 
