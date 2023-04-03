@@ -21,7 +21,7 @@ public class ExtensionController : ControllerBase
     [Route("{id}/{version?}")]
     public IActionResult GetExtension(string id, string version = "", bool prerelease = false)
     {
-        var packages = _databaseService.Packages
+        var packages = _databaseService
            .Find(p => p.Identifier == id)
              .OrderByDescending(r => GetVersion(r.Version));
 
@@ -32,7 +32,7 @@ public class ExtensionController : ControllerBase
     [Route("targets/{id}/{version?}")]
     public IActionResult GetTargets(string id, string version = "")
     {
-        var targets = _databaseService.Packages
+        var targets = _databaseService
            .Find(p => p.Identifier == id && p.Version == version)
            .Where(p => p.Metadata.Identity.TargetPlatform != null)
            .Select(p => p.Metadata.Identity.TargetPlatform)
@@ -80,8 +80,8 @@ public class ExtensionController : ControllerBase
 
     IEnumerable<ExtensionPackage> GetPreReleasePackages(bool prerelease)
     {
-        var packagesList = prerelease ? _databaseService.Packages.Query().ToList()
-        : _databaseService.Packages.Find(p => !p.IsPreRelease).ToList();
+        var packagesList = prerelease ? _databaseService.Query()
+        : _databaseService.Find(p => !p.IsPreRelease);
 
         var extensionPackages = packagesList.GroupBy(p => new { p.Identifier, p.Version })
         .Select(x =>
@@ -116,7 +116,6 @@ public class ExtensionController : ControllerBase
 
     public ExtensionController(
         [NotNull] IDatabaseService databaseService,
-        [NotNull] ILogger<ExtensionController> logger,
         IWebHostEnvironment environment,
         IPackageReader manifestReader)
     {

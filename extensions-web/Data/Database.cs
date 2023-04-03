@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using LiteDB;
 using Semver;
 
@@ -25,6 +26,15 @@ public class DatabaseService : IDatabaseService
         return success;
     }
 
+    public List<ExtensionManifest> Find(Expression<Func<ExtensionManifest, bool>> predicate)
+    {
+        return Packages.Find(predicate).ToList();
+    }
+
+    public List<ExtensionManifest> Query()
+    {
+        return Packages.Query().ToList();
+    }
 
     public ILiteCollection<ExtensionManifest> Packages =>
         _database.GetCollection<ExtensionManifest>("packages");

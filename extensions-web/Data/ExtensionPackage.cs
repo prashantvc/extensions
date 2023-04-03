@@ -1,4 +1,4 @@
-class ExtensionPackage
+public class ExtensionPackage
 {
     public ExtensionPackage(string identifier, string version, IList<ExtensionManifest> extensions)
     {
