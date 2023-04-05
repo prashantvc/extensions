@@ -1,17 +1,18 @@
-import { Avatar, Divider, List, Space, Switch, Tag } from "antd";
+import { Divider, Space, Switch } from "antd";
 import React from "react";
 import { Button, message, Upload, Typography } from 'antd';
-import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { UploadChangeParam } from "antd/es/upload/interface";
-import { IPackage, PackageWrapper } from "../data/package";
-import { NavLink } from "react-router-dom";
+import { Extension, IExtension } from "../data/extension";
+import { PackageList } from "./packageList";
+import { ExtensionPackage } from "../data/extensionPackage";
 
 const { Text } = Typography;
 
 export class Extensions extends React.Component<
     {},
     {
-        packages: PackageWrapper[];
+        extensions: ExtensionPackage[];
         loading: boolean;
         showPrerelease: boolean;
     }
@@ -38,7 +39,7 @@ export class Extensions extends React.Component<
 
     constructor(props: any) {
         super(props);
-        this.state = { packages: [], loading: true, showPrerelease: false };
+        this.state = { extensions: [], loading: true, showPrerelease: false };
     }
 
     public render() {
@@ -54,33 +55,7 @@ export class Extensions extends React.Component<
                     </Space>
                 </Space>
                 <Divider />
-                <List itemLayout="horizontal"
-                    dataSource={this.state.packages}
-                    renderItem={(item, index) => (
-                        <List.Item
-                            actions={[
-                                <Button size="small" type="primary" href={item.packagePath} icon={<DownloadOutlined />}>Download</Button>
-                            ]}>
-                            <List.Item.Meta
-                                avatar={
-                                    <Avatar shape="square" size="large" src={item.iconPath} />
-                                }
-                                title={
-                                    <Space align="center">
-                                        <NavLink to={`/details/${item.extensionPackage.identifier}/${item.extensionPackage.version}`}>
-                                            {item.displayName}
-                                        </NavLink>
-
-                                        <Text type="secondary">{item.extensionPackage.identifier}</Text>
-                                        <Tag>v{item.extensionPackage.version}</Tag>
-                                    </Space>
-
-                                }
-                                description={item.description}
-                            />
-                        </List.Item>
-                    )}
-                />
+                <PackageList datasource={this.state.extensions} />
             </div>
         );
     }
@@ -89,17 +64,32 @@ export class Extensions extends React.Component<
         this.populateExtensions();
     }
 
-    
-
     async populateExtensions() {
         console.log("Populating extensions");
         this.setState({ loading: true })
 
         console.log(`extension?prerelease=${this.state.showPrerelease}`);
         const response = await fetch(`extension?prerelease=${this.state.showPrerelease}`);
-        const extensionData: IPackage[] = await response.json();
-        const packages = extensionData.map(p => new PackageWrapper(p))
+        if (response.status === 204) {
+            console.log(response);
+            this.setState({ extensions: [], loading: false });
+            return;
+        }
+        type res = { identifier: string, version: string, extensions: IExtension[] };
+        const extensionResponse: [res]
+            = await response.json();
 
-        this.setState({ packages: packages, loading: false });
+        let uniqueExtensions = extensionResponse.reduce((acc: res[], curr: res) => {
+            if (acc.find((p) => p.identifier === curr.identifier)) {
+                return acc;
+            }
+            return [...acc, curr];
+        }, []);
+
+        console.info(uniqueExtensions);
+
+        const localExtensions = uniqueExtensions
+            .map((p) => new ExtensionPackage(p.identifier, p.version, p.extensions));
+        this.setState({ extensions: localExtensions, loading: false });
     }
 }

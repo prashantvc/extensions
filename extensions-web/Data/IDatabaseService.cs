@@ -1,7 +1,10 @@
+using System.Linq.Expressions;
 using LiteDB;
 
 public interface IDatabaseService
 {
-    public ILiteCollection<PackageManifest> Packages { get; }
-    BsonValue InsertPackage(PackageManifest package);
+    BsonValue InsertPackage(ExtensionManifest package);
+
+    List<ExtensionManifest> Find(Expression<Func<ExtensionManifest, bool>> predicate);
+    List<ExtensionManifest> Query();
 }

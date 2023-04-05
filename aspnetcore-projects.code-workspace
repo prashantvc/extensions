@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "extensions-web-tests"
+		},
+		{
+			"path": "extensions-web"
+		}
+	],
+	"settings": {
+		"dotnet-test-explorer.testProjectPath": "**/*tests.@(csproj|vbproj|fsproj)"
+	}
+}

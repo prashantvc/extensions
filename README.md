@@ -14,10 +14,10 @@ With private extension repository, you can ensure that your extensions are secur
 ## Instruction
 
 1. Fork the repository
-2. Switch to `react-client` branch
 3. Run `npm i`
 4. Finally, `dotnet run`
 
-# Screenshot
+# Screencast
 
-<img width="953" alt="Screenshot 2023-03-22 at 19 43 05" src="https://user-images.githubusercontent.com/328076/226931543-661ca28c-f7ad-4e0d-afb6-7a0abd43948c.png">
+https://user-images.githubusercontent.com/328076/228275355-3728d75d-6bc9-46fe-bbb8-3a3f94acd15e.mov
+
