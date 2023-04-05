@@ -14,6 +14,7 @@ export interface IExtension {
     categories: string[];
     displayName: string;
     description: string;
+    location: string;
     relativeIconPath: string;
     relativeReadmePath: string;
 }
@@ -39,13 +40,11 @@ export class Extension {
         let path = this.extension.relativeReadmePath;
         return this.extensionPath + "/" + path;
     }
-    get extensionPath(): string {
-        var extensionPath = (this.extension.metadata.identity.targetPlatform !== null) ?
-            `output/${this.extension.identifier}-${this.extension.version}@${this.extension.metadata.identity.targetPlatform}` :
-            `output/${this.extension.identifier}-${this.extension.version}`
 
-        return extensionPath;
+    get extensionPath(): string {
+        return `output/${this.extension.location}`;
     }
+
     extension: IExtension
 }
 

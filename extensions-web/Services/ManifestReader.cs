@@ -14,13 +14,13 @@ public class PackageReader : IPackageReader
     public ExtensionManifest ExtractPackage(string fileOnServer)
     {
         string outputFilePath = ExtractFile(fileOnServer, "extension.vsixmanifest");
-        ExtensionManifest? packageManifest = default(ExtensionManifest);
+        ExtensionManifest? manifest = default(ExtensionManifest);
 
         var serializer = new XmlSerializer(typeof(ExtensionManifest));
         using (StringReader stream = new StringReader(File.ReadAllText(outputFilePath)))
         {
-            packageManifest = serializer.Deserialize(stream) as ExtensionManifest;
-            var assets = packageManifest?.Assets;
+            manifest = serializer.Deserialize(stream) as ExtensionManifest;
+            var assets = manifest?.Assets;
 
             foreach (var asset in assets)
             {
@@ -28,8 +28,9 @@ public class PackageReader : IPackageReader
                     ExtractFile(fileOnServer, asset.Path);
             }
         }
-
-        return packageManifest;
+        //set file name
+        manifest.Location = Path.GetFileNameWithoutExtension(fileOnServer);
+        return manifest;
     }
     public string ExtractFile(string fileOnServer, string extractFileName)
     {
