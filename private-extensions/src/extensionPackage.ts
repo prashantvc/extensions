@@ -1,5 +1,4 @@
-import { Extension, IExtension } from "./extension";
-
+import { Extension, IExtension } from "./extensionData";
 
 export class ExtensionPackage {
     identifier: string;
