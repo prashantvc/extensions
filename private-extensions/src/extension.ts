@@ -39,6 +39,22 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  let enablePrerelease = vscode.commands.registerCommand(
+    "private-extensions.prerelease",
+    async () => {
+      await vscode.workspace
+        .getConfiguration("")
+        .update(
+          "privateExtensions.Prerelease",
+          !vscode.workspace
+            .getConfiguration("")
+            .get("privateExtensions.Prerelease"),
+          vscode.ConfigurationTarget.Global
+        );
+      extensionDataProvider.refresh();
+    }
+  );
+
   vscode.commands.registerCommand("private-extensions.refresh", () =>
     extensionDataProvider.refresh()
   );
@@ -77,6 +93,12 @@ export function activate(context: vscode.ExtensionContext) {
       }
     );
   }
+
+  vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration("privateExtensions.Prerelease")) {
+      extensionDataProvider.refresh();
+    }
+  });
 }
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {

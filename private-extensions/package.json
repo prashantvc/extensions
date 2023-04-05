@@ -29,6 +29,10 @@
         "command": "private-extensions.install",
         "title": "Install Extension",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "private-extensions.prerelease",
+        "title": "Enable Prerelease Extension"
       }
     ],
     "viewsContainers": {
@@ -62,6 +66,16 @@
             "type": "array",
             "order": 0,
             "description": "This is the list of private extension repository sources."
+          }
+        }
+      },
+      {
+        "title": "Private Extensions",
+        "properties": {
+          "privateExtensions.Prerelease": {
+            "type": "boolean",
+            "order": 1,
+            "description": "Show prerelease versions in the list."
           }
         }
       }
