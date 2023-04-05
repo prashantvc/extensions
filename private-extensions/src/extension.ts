@@ -3,6 +3,7 @@
 import axios from "axios";
 import * as vscode from "vscode";
 import { PrivateExtensionProvider } from "./privateExtensionProvider";
+import { log } from "console";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -41,6 +42,14 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("private-extensions.refresh", () =>
         extensionDataProvider.refresh()
     );
+
+    vscode.commands.registerCommand("private-extensions.select", (item) => {
+        log(`Selected ${item.identifier} - v${item.version}...`);
+    });
+
+    vscode.commands.registerCommand("private-extensions.install", (item) => {
+        log(`Installing ${item.identifier}...`);
+    });
 
     context.subscriptions.push(addSource);
 }
