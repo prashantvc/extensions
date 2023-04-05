@@ -13,7 +13,7 @@ public class ExtensionManifest
     public string Version => Metadata.Identity.Version;
     public string Target => Metadata?.Identity?.TargetPlatform ?? "any";
     public string Location { get; set; } = string.Empty;
-    public string[] Categories => Metadata.CategoryString.Split(',');
+    public string[] Categories => Metadata.CategoryString?.Split(',');
     public string DisplayName => Metadata?.DisplayName ?? Identifier;
     public string? Description => Metadata?.Description ?? string.Empty;
     public string? RelativeIconPath => Assets?.FirstOrDefault(a => a.AssetType == "Microsoft.VisualStudio.Services.Icons.Default")?.Path;

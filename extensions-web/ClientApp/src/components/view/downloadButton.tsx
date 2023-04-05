@@ -14,7 +14,7 @@ export const DownloadButton = ({ extensions }: { extensions: Extension[] }) => {
 
     if (extensions.length <= 1) {
         return (
-            <Button size="small" type="primary" href={extensions[0].extensionPath}>Download <DownloadOutlined /></Button>
+            <Button size="small" type="primary" href={extensions[0].packagePath}>Download <DownloadOutlined /></Button>
         );
     } else {
         return (
