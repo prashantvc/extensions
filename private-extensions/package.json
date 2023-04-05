@@ -18,18 +18,17 @@
             {
                 "command": "private-extensions.refresh",
                 "title": "Refresh Private Extensions List",
-                "icon": {
-                    "light": "icons/light/refresh.svg",
-                    "dark": "icons/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "private-extensions.addSource",
                 "title": "Add Private Repository Source",
-                "icon": {
-                    "light": "icons/light/folder.svg",
-                    "dark": "icons/dark/folder.svg"
-                }
+                "icon": "$(server)"
+            },
+            {
+                "command": "private-extensions.install",
+                "title": "Install Extension",
+                "icon": "$(cloud-download)"
             }
         ],
         "viewsContainers": {
@@ -78,6 +77,13 @@
                     "command": "private-extensions.refresh",
                     "when": "view == private-extensions",
                     "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "private-extensions.install",
+                    "when": "view == private-extensions",
+                    "group": "inline"
                 }
             ]
         }
