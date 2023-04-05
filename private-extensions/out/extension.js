@@ -1,24 +1,30 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
+const privateExtensionProvider_1 = require("./privateExtensionProvider");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "private-extensions" is now active!');
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('private-extensions.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World from private-extensions!');
+    const extensionDataProvider = new privateExtensionProvider_1.PrivateExtensionProvider();
+    vscode.window.registerTreeDataProvider("private-extensions", extensionDataProvider);
+    let addSource = vscode.commands.registerCommand("private-extensions.addSource", async () => {
+        vscode.window
+            .showInputBox({
+            placeHolder: "Enter the repository URL",
+        })
+            .then(async (url) => {
+            if (url) {
+                vscode.window.showInformationMessage(`Added source ${url}`);
+                await vscode.workspace
+                    .getConfiguration("")
+                    .update("privateExtensions.Source", [url], vscode.ConfigurationTarget.Global);
+                extensionDataProvider.refresh();
+            }
+        });
     });
-    context.subscriptions.push(disposable);
+    vscode.commands.registerCommand("private-extensions.refresh", () => extensionDataProvider.refresh());
+    context.subscriptions.push(addSource);
 }
 exports.activate = activate;
 // This method is called when your extension is deactivated

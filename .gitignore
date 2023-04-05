@@ -36,3 +36,7 @@ typings/
 Share
 Edit
 Follow
+**/out/*
+**/bin/*
+**/obj/*
+**/.vscode/*
