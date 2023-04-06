@@ -32,7 +32,7 @@
       },
       {
         "command": "private-extensions.prerelease",
-        "title": "Enable Prerelease Extension"
+        "title": "Toggle Prerelease Extensions"
       }
     ],
     "viewsContainers": {

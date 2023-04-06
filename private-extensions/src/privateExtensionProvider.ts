@@ -1,7 +1,8 @@
 import axios from "axios";
 import * as vscode from "vscode";
-import { Extension, IExtension } from "./extensionData";
+import { IExtension } from "./extensionData";
 import { ExtensionPackage } from "./extensionPackage";
+import { getExtensionSource, getPrerelease } from "./utlis";
 
 export class PrivateExtensionProvider
   implements vscode.TreeDataProvider<ExtensionPackage>
@@ -76,20 +77,4 @@ class ExtensionView extends vscode.TreeItem {
       arguments: [extension],
     };
   }
-}
-
-function getExtensionSource(): string {
-  let url = vscode.workspace
-    .getConfiguration("")
-    .get<string[]>("privateExtensions.Source");
-
-  return url ? url[0] : "";
-}
-
-function getPrerelease(): boolean {
-  return (
-    vscode.workspace
-      .getConfiguration("")
-      .get<boolean>("privateExtensions.Prerelease") ?? false
-  );
 }

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { ExtensionPackage } from "./extensionPackage";
+import { getExtensionSource } from "./utlis";
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
   return {
@@ -184,12 +185,4 @@ function getNonce() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
-}
-
-function getExtensionSource(): string {
-  let url = vscode.workspace
-    .getConfiguration("")
-    .get<string[]>("privateExtensions.Source");
-
-  return url ? url[0] : "";
 }

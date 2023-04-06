@@ -6,6 +6,7 @@ import { PrivateExtensionProvider } from "./privateExtensionProvider";
 import { log } from "console";
 import { ExtensionDetailsPanel } from "./extensionDetailsPanel";
 import { ExtensionPackage } from "./extensionPackage";
+import { installExtension } from "./utlis";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -68,11 +69,15 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  vscode.commands.registerCommand("private-extensions.install", (item) => {
-    log(`Installing ${item.identifier}...`);
-  });
+  vscode.commands.registerCommand(
+    "private-extensions.install",
+    async (item: ExtensionPackage) => {
+      await installExtension(item, context);
+    }
+  );
 
   context.subscriptions.push(addSource);
+  context.subscriptions.push(enablePrerelease);
 
   if (vscode.window.registerWebviewPanelSerializer) {
     // Make sure we register a serializer in activation event
