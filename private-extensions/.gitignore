@@ -23,7 +23,8 @@ bin/
 Bin/
 obj/
 Obj/
-**/[Oo]ut/
+**/[Oo]ut/*
+**/out/*
 
 # Visual Studio 2015 cache/options directory
 .vs/

@@ -68,7 +68,6 @@ export class Extensions extends React.Component<
         console.log("Populating extensions");
         this.setState({ loading: true })
 
-        console.log(`extension?prerelease=${this.state.showPrerelease}`);
         const response = await fetch(`extension?prerelease=${this.state.showPrerelease}`);
         if (response.status === 204) {
             console.log(response);

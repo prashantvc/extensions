@@ -48,7 +48,7 @@ public class ExtensionController : ControllerBase
         if (!IsExtensionAllowed(filePath))
             return BadRequest("Bad extension");
 
-        string uploadDirectory = CreateOrGetUloadDirectory();
+        string uploadDirectory = Utilities.UploadDirectory(_environment);
 
         string fileOnServer = Path.Combine(uploadDirectory, filePath);
         using (var fileStream = new FileStream(fileOnServer, FileMode.Create))
@@ -71,9 +71,25 @@ public class ExtensionController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("download/{identifier}/{version?}")]
+    public IActionResult DownloadPackage(string identifier, string version)
+    {
+        var package = _databaseService.Find(p => p.Identifier == identifier && p.Version == version).FirstOrDefault();
+        if (package == null)
+            return NotFound();
+
+        string outputDirectory = Utilities.OutputDirectory(_environment);
+        string fileOnServer = $"{Path.Combine(outputDirectory, package.Location)}.vsix";
+        if (!System.IO.File.Exists(fileOnServer))
+            return NotFound();
+
+        return PhysicalFile(fileOnServer, "application/octet-stream", package.Location);
+    }
+
     void MoveUploadedFile(string fileOnServer)
     {
-        string uploadDirectory = _manifestReader.CreateOrGetOutputDirectory();
+        string uploadDirectory = Utilities.OutputDirectory(_environment);
         string fileName = Path.GetFileName(fileOnServer);
         System.IO.File.Move(fileOnServer, Path.Combine(uploadDirectory, fileName), true);
     }
@@ -90,18 +106,6 @@ public class ExtensionController : ControllerBase
             )).OrderByDescending(r => GetVersion(r.Version));
 
         return extensionPackages;
-    }
-
-    string CreateOrGetUloadDirectory()
-    {
-        string uploadDirectory = "uploads";
-        uploadDirectory = Path.Combine(_environment.ContentRootPath, uploadDirectory);
-        if (!Directory.Exists(uploadDirectory))
-        {
-            Directory.CreateDirectory(uploadDirectory);
-        }
-
-        return uploadDirectory;
     }
 
     SemVersion GetVersion(string version)

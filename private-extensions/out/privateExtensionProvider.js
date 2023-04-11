@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrivateExtensionProvider = void 0;
 const axios_1 = require("axios");
 const vscode = require("vscode");
-const data_1 = require("./data");
+const extensionPackage_1 = require("./extensionPackage");
+const utlis_1 = require("./utlis");
 class PrivateExtensionProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
@@ -16,16 +17,24 @@ class PrivateExtensionProvider {
         return this.getExtensionData();
     }
     async getExtensionData() {
-        let url = getExtensionSource();
+        let url = (0, utlis_1.getExtensionSource)();
         if (url === undefined || url === "") {
             return [];
         }
-        const res = await axios_1.default.get(`${url}/extension`);
+        const prerelease = (0, utlis_1.getPrerelease)();
+        const res = await axios_1.default.get(`${url}/extension?prerelease=${prerelease}`);
         if (res.status !== axios_1.default.HttpStatusCode.Ok) {
             return [];
         }
-        let packages = res.data.map(p => new data_1.PackageWrapper(p));
-        return packages;
+        let responseData = res.data;
+        let uniqueExtensions = responseData.reduce((acc, curr) => {
+            if (acc.find((p) => p.identifier === curr.identifier)) {
+                return acc;
+            }
+            return [...acc, curr];
+        }, []);
+        const localExtensions = uniqueExtensions.map((p) => new extensionPackage_1.ExtensionPackage(p.identifier, p.version, p.extensions));
+        return localExtensions;
     }
     refresh() {
         this._onDidChangeTreeData.fire();
@@ -36,14 +45,15 @@ class ExtensionView extends vscode.TreeItem {
     constructor(extension) {
         super(extension.displayName, vscode.TreeItemCollapsibleState.None);
         this.extension = extension;
-        this.id = extension.extensionPackage.identifier;
-        this.tooltip = `${extension.extensionPackage.identifier} - ${extension.extensionPackage.version}`;
-        this.description = extension.description;
+        this.id = extension.identifier;
+        this.description = `v${extension.version}`;
+        this.tooltip = extension.description;
+        this.iconPath = new vscode.ThemeIcon("extensions");
+        this.command = {
+            command: "private-extensions.select",
+            title: "",
+            arguments: [extension],
+        };
     }
-}
-function getExtensionSource() {
-    let url = vscode.workspace
-        .getConfiguration("").get("privateExtensions.Source");
-    return (url) ? url[0] : "";
 }
 //# sourceMappingURL=privateExtensionProvider.js.map

@@ -5,8 +5,6 @@ public interface IPackageReader
 {
     string ExtractFile(string fileOnServer, string extractFileName);
     ExtensionManifest ExtractPackage(string fileOnServer);
-
-    public string CreateOrGetOutputDirectory();
 }
 
 public class PackageReader : IPackageReader
@@ -34,12 +32,12 @@ public class PackageReader : IPackageReader
     }
     public string ExtractFile(string fileOnServer, string extractFileName)
     {
-        string outputDirectory = CreateOrGetOutputDirectory();
+        string outputDirectory = Utilities.OutputDirectory(_environment);
         string fileName = Path.GetFileNameWithoutExtension(fileOnServer);
 
         string extractFilePath = Path.Combine(outputDirectory, fileName, extractFileName);
 
-        CreateDirectory(extractFilePath);
+        Utilities.CreateDirectory(extractFilePath);
 
         using (var archive = ZipFile.OpenRead(fileOnServer))
         {
@@ -51,25 +49,6 @@ public class PackageReader : IPackageReader
         }
 
         return extractFilePath;
-    }
-
-    void CreateDirectory(string path)
-    {
-        string? directoryName = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
-            Directory.CreateDirectory(directoryName);
-    }
-
-    public string CreateOrGetOutputDirectory()
-    {
-        string outputDirectory = "output";
-        outputDirectory = Path.Combine(_environment.ContentRootPath, "ClientApp/public", outputDirectory);
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        return outputDirectory;
     }
 
     public PackageReader(IWebHostEnvironment environment)

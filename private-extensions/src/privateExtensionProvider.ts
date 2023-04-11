@@ -1,29 +1,55 @@
 import axios from "axios";
 import * as vscode from "vscode";
-import { IPackage, PackageWrapper } from "./data";
+import { IExtension } from "./extensionData";
+import { ExtensionPackage } from "./extensionPackage";
+import { getExtensionSource, getPrerelease } from "./utlis";
 
-export class PrivateExtensionProvider implements vscode.TreeDataProvider<PackageWrapper> {
-    getTreeItem(element: PackageWrapper): vscode.TreeItem | Thenable<vscode.TreeItem> {
+export class PrivateExtensionProvider
+    implements vscode.TreeDataProvider<ExtensionPackage>
+{
+    getTreeItem(
+        element: ExtensionPackage
+    ): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return new ExtensionView(element);
     }
-    getChildren(element?: PackageWrapper | undefined): vscode.ProviderResult<PackageWrapper[]> {
+    getChildren(
+        element?: ExtensionPackage | undefined
+    ): vscode.ProviderResult<ExtensionPackage[]> {
         return this.getExtensionData();
     }
 
-    async getExtensionData(): Promise<PackageWrapper[]> {
-
+    async getExtensionData(): Promise<ExtensionPackage[]> {
         let url = getExtensionSource();
         if (url === undefined || url === "") {
             return [];
         }
-    
-        const res = await axios.get<IPackage[]>(`${url}/extension`);
+
+        type Ext = {
+            identifier: string;
+            version: string;
+            extensions: IExtension[];
+        };
+        const prerelease = getPrerelease();
+        const res = await axios.get<Ext[]>(
+            `${url}/extension?prerelease=${prerelease}`
+        );
         if (res.status !== axios.HttpStatusCode.Ok) {
             return [];
         }
 
-        let packages = res.data.map(p => new PackageWrapper(p));
-        return packages;
+        let responseData = res.data;
+        let uniqueExtensions = responseData.reduce((acc: Ext[], curr: Ext) => {
+            if (acc.find((p) => p.identifier === curr.identifier)) {
+                return acc;
+            }
+            return [...acc, curr];
+        }, []);
+
+        const localExtensions = uniqueExtensions.map(
+            (p) => new ExtensionPackage(p.identifier, p.version, p.extensions)
+        );
+
+        return localExtensions;
     }
 
     refresh(): void {
@@ -31,24 +57,24 @@ export class PrivateExtensionProvider implements vscode.TreeDataProvider<Package
     }
 
     private _onDidChangeTreeData: vscode.EventEmitter<
-    PackageWrapper | undefined | null | void
-    > = new vscode.EventEmitter<PackageWrapper | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<PackageWrapper | undefined | null | void> =
-        this._onDidChangeTreeData.event;
+        ExtensionPackage | undefined | null | void
+    > = new vscode.EventEmitter<ExtensionPackage | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<
+        ExtensionPackage | undefined | null | void
+    > = this._onDidChangeTreeData.event;
 }
 
 class ExtensionView extends vscode.TreeItem {
-    constructor(public readonly extension: PackageWrapper) {
+    constructor(public readonly extension: ExtensionPackage) {
         super(extension.displayName, vscode.TreeItemCollapsibleState.None);
-        this.id = extension.extensionPackage.identifier;
-        this.tooltip = `${extension.extensionPackage.identifier} - ${extension.extensionPackage.version}`;
-        this.description = extension.description;
+        this.id = extension.identifier;
+        this.description = `v${extension.version}`;
+        this.tooltip = extension.description;
+        this.iconPath = new vscode.ThemeIcon("extensions");
+        this.command = {
+            command: "private-extensions.select",
+            title: "",
+            arguments: [extension],
+        };
     }
-}
-
-function getExtensionSource(): string {
-    let url = vscode.workspace
-        .getConfiguration("").get<string[]>("privateExtensions.Source");
-    
-    return (url) ? url[0] : "";
 }
