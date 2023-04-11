@@ -1,0 +1,29 @@
+{
+  "name": "extensions-cli",
+  "version": "0.0.1",
+  "description": "CLI tool to manage Private Visual Studio Code extensions",
+  "main": "index.js",
+  "dependencies": {
+    "commander": "^10.0.0",
+    "figlet": "^1.6.0"
+  },
+  "bin": {
+    "pe": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx tsc && node dist/index.js"
+  },
+  "keywords": [
+    "vscode",
+    "vsce",
+    "extension"
+  ],
+  "author": "Color Code Labs",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.4"
+  }
+}
