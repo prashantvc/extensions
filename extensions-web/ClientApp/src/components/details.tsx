@@ -42,7 +42,7 @@ const DetailsPage = () => {
 			}
 		}
 		fetchData();
-	}, [identifier, version]);
+	}, [identifier, version, navigate]);
 
 	//get unique values
 	const items: MenuProps["items"] = uniqueVersions.map((v) => {
