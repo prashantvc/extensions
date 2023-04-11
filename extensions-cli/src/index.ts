@@ -8,21 +8,18 @@ const program = new Command();
 
 program.name(pkg.name).description(pkg.description).version(pkg.version);
 
-program.command("figlet").argument("<text>", "Text to display").description("Show figlet").action(showFiglet);
+program
+	.command("download")
+	.argument("<identifier>", "Extension identifier")
+	.description("Download extension from Visual Studio Marketplace")
+	.option("-r, --recursive [value]", "Download all dependencies recursively", true)
+	.action(downloadExtension);
 
 program.parse(process.argv);
 
 const options = program.opts();
 
-if (options.figlet) {
-	showFiglet();
-}
-
-async function showFiglet(text: string = "Extensions") {
-	const txt = await figlet.textSync(text, {
-		font: "Standard",
-		horizontalLayout: "default",
-		verticalLayout: "default",
-	});
-	console.log(txt);
+async function downloadExtension(identifier: string, options: { recursive: boolean }) {
+	console.log(options.recursive);
+	console.log("Downloading extension: " + identifier);
 }
