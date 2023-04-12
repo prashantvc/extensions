@@ -13,6 +13,7 @@ program
 	.command("download")
 	.argument("<identifier>", "Extension identifier")
 	.description("Download extension from Visual Studio Marketplace")
+	.option("-v, --version <value>", "Version to download (default: latest)")
 	.option("-r, --recursive [value]", "Download all dependencies recursively", true)
 	.action(downloadExtensionById);
 

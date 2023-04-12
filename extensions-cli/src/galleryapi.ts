@@ -6,7 +6,6 @@ import {
 	TypeInfo,
 } from "azure-devops-node-api/interfaces/GalleryInterfaces";
 import { ContractSerializer } from "azure-devops-node-api/Serialization";
-
 export interface VSCodePublishedExtension extends PublishedExtension {
 	publisher: { displayName: string; publisherName: string };
 }
@@ -57,9 +56,13 @@ export class GalleryApi {
 		);
 	}
 
-	async downloadExtension(extension: VSCodePublishedExtension, version: string): Promise<Buffer> {
+	async downloadExtension(extension: {
+		publisherName: string;
+		extensionName: string;
+		version: string;
+	}): Promise<{ filename: string; data: Buffer }> {
 		const response = await fetch(
-			`${this.baseUrl}/publishers/${extension.publisher.publisherName}/vsextensions/${extension.extensionName}/${version}/vspackage`,
+			`${this.baseUrl}/publishers/${extension.publisherName}/vsextensions/${extension.extensionName}/${extension.version}/vspackage`,
 			{
 				method: "GET",
 				headers: {
@@ -72,8 +75,8 @@ export class GalleryApi {
 			throw new Error(`Failed to download extension ${extension.extensionName}`);
 		}
 
-		const filename = this.getFilename(response);
-		console.log(`Downloading ${filename}`);
+		const extensionFilename = this.getFilename(response);
+		console.log(`Downloading ${extensionFilename}`);
 
 		const contentLength = response.headers.get("Content-Length");
 		const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
@@ -100,17 +103,16 @@ export class GalleryApi {
 
 		const blob = new Blob(chunks);
 		const buffer = await blob.arrayBuffer();
-		return Buffer.from(buffer);
+		return { filename: extensionFilename, data: Buffer.from(buffer) };
 	}
 
 	getFilename(response: Response): string {
 		const contentDisposition = response.headers.get("Content-Disposition");
 		let filename = "";
 		if (contentDisposition) {
-			const match = contentDisposition.match(/filename="(.+)"/);
+			const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?;?/i);
 			if (match) {
 				filename = match[1];
-				console.log(`Downloaded file: ${filename}`);
 			}
 		}
 		return filename;
