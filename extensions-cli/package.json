@@ -4,8 +4,9 @@
   "description": "CLI tool to manage Private Visual Studio Code extensions",
   "main": "index.js",
   "dependencies": {
+    "azure-devops-node-api": "^12.0.0",
     "commander": "^10.0.0",
-    "figlet": "^1.6.0"
+    "semver": "^7.4.0"
   },
   "bin": {
     "pe": "./dist/index.js"
@@ -25,6 +26,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^18.15.11",
+    "@types/semver": "^7.3.13",
     "typescript": "^5.0.4"
   }
 }
