@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import { showExtension } from "./showExtension";
 import { downloadExtensionById } from "./downloadExtension";
+import { repoCommand } from "./repoCommands";
 
 const pkg = require("../package.json");
 const program = new Command();
@@ -23,6 +24,6 @@ program
 	.description("Show extension details from Visual Studio Marketplace")
 	.action(showExtension);
 
-program.parse(process.argv);
+program.addCommand(repoCommand);
 
-const options = program.opts();
+program.parse(process.argv);
