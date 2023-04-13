@@ -6,6 +6,7 @@ import {
 	TypeInfo,
 } from "azure-devops-node-api/interfaces/GalleryInterfaces";
 import { ContractSerializer } from "azure-devops-node-api/Serialization";
+import { ExtensionVersionGroup, getLatestExtensionVersion } from "./util";
 export interface VSCodePublishedExtension extends PublishedExtension {
 	publisher: { displayName: string; publisherName: string };
 }
@@ -56,26 +57,23 @@ export class GalleryApi {
 		);
 	}
 
-	async downloadExtension(extension: {
-		publisherName: string;
-		extensionName: string;
-		version: string;
-	}): Promise<{ filename: string; data: Buffer }> {
-		const response = await fetch(
-			`${this.baseUrl}/publishers/${extension.publisherName}/vsextensions/${extension.extensionName}/${extension.version}/vspackage`,
-			{
-				method: "GET",
-				headers: {
-					Accept: "application/octet-stream",
-				},
-			}
-		);
+	async downloadExtension(
+		extension: VSCodePublishedExtension,
+		version: string | undefined
+	): Promise<{ filename: string; data: Buffer }> {
+		const extensionVersion = getLatestExtensionVersion(extension, version);
+		const response = await fetch(extensionVersion.details[0].assetUrl, {
+			method: "GET",
+			headers: {
+				Accept: "application/octet-stream",
+			},
+		});
 
 		if (!response.ok) {
 			throw new Error(`Failed to download extension ${extension.extensionName}`);
 		}
 
-		const extensionFilename = this.getFilename(response);
+		const extensionFilename = this.getFilename(extension, extensionVersion);
 		console.log(`Downloading ${extensionFilename}`);
 
 		const contentLength = response.headers.get("Content-Length");
@@ -106,16 +104,15 @@ export class GalleryApi {
 		return { filename: extensionFilename, data: Buffer.from(buffer) };
 	}
 
-	getFilename(response: Response): string {
-		const contentDisposition = response.headers.get("Content-Disposition");
-		let filename = "";
-		if (contentDisposition) {
-			const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?;?/i);
-			if (match) {
-				filename = match[1];
-			}
+	getFilename(extension: VSCodePublishedExtension, extnVersion: ExtensionVersionGroup): string {
+		const version = extnVersion.version.raw;
+		const targetPlatform = extnVersion.details[0].targetPlatform;
+
+		if (targetPlatform === undefined) {
+			return `${extension.publisher.publisherName}.${extension.extensionName}-${version}.vsix`;
+		} else {
+			return `${extension.publisher.publisherName}.${extension.extensionName}-${version}@${targetPlatform}.vsix`;
 		}
-		return filename;
 	}
 
 	async getExtensionById(id: string): Promise<VSCodePublishedExtension | undefined> {

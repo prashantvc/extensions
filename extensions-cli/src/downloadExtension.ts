@@ -1,27 +1,20 @@
+import path from "path";
 import { getPublicGalleryAPIUrl, versionGroup } from "./util";
 import * as fs from "fs";
 
 export async function downloadExtensionById(identifier: string, options: { version: string; recursive: boolean }) {
-	console.log(`Downloading ${identifier}, ${options.version}, ${options.recursive}...`);
+	let extension = await getPublicGalleryAPIUrl().getExtensionById(identifier);
 
-	let extension = await getExtensionDetails(identifier, options.version);
-	let response = await getPublicGalleryAPIUrl().downloadExtension(extension);
+	if (extension !== undefined) {
+		let response = await getPublicGalleryAPIUrl().downloadExtension(extension, options.version);
 
-	fs.writeFileSync(`~/Downloads/${response.filename}`, response.data);
-}
+		const filePath = path.join(__dirname, response.filename);
+		fs.writeFile(filePath, response.data, (err) => {
+			if (err) {
+				console.error(err);
+			}
+		});
 
-async function getExtensionDetails(identifier: string, version: string | undefined) {
-	const id = identifier.split(".");
-	const publisher = id[0];
-	const name = id[1];
-	let latestVersion = version;
-
-	if (version === undefined) {
-		let extension = await getPublicGalleryAPIUrl().getExtensionById(identifier);
-		if (extension !== undefined) {
-			latestVersion = version ?? versionGroup(extension.versions!)[0].version.raw;
-		}
+		console.log(`Downloaded ${extension.displayName} to ${filePath}`);
 	}
-
-	return { publisherName: publisher, extensionName: name, version: latestVersion! };
 }

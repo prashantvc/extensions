@@ -1,4 +1,4 @@
-import { GalleryApi } from "./galleryapi";
+import { GalleryApi, VSCodePublishedExtension } from "./galleryapi";
 import { ExtensionVersion } from "azure-devops-node-api/interfaces/GalleryInterfaces";
 import * as semver from "semver";
 
@@ -36,6 +36,18 @@ export function versionGroup(versionList: ExtensionVersion[], maxVersions = 5): 
 		.slice(0, maxVersions);
 
 	return versionGroup;
+}
+
+export function getLatestExtensionVersion(
+	ext: VSCodePublishedExtension,
+	version: string | undefined
+): ExtensionVersionGroup {
+	let versions = versionGroup(ext.versions!);
+	if (version === undefined) {
+		return versions[0];
+	} else {
+		return versions.find((v) => v.version.raw === version) ?? versions[0];
+	}
 }
 
 export interface ExtensionVersionGroup {
