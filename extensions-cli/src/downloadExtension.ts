@@ -6,15 +6,6 @@ export async function downloadExtensionById(identifier: string, options: { versi
 	let extension = await getPublicGalleryAPIUrl().getExtensionById(identifier);
 
 	if (extension !== undefined) {
-		let response = await getPublicGalleryAPIUrl().downloadExtension(extension, options.version);
-
-		const filePath = path.join(__dirname, response.filename);
-		fs.writeFile(filePath, response.data, (err) => {
-			if (err) {
-				console.error(err);
-			}
-		});
-
-		console.log(`Downloaded ${extension.displayName} to ${filePath}`);
+		await getPublicGalleryAPIUrl().downloadExtension(extension, options.version);
 	}
 }

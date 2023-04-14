@@ -6,7 +6,9 @@ import {
 	TypeInfo,
 } from "azure-devops-node-api/interfaces/GalleryInterfaces";
 import { ContractSerializer } from "azure-devops-node-api/Serialization";
-import { ExtensionVersionGroup, getLatestExtensionVersion } from "./util";
+import { ExtensionVersionGroup, getLatestExtensionVersion, VersionDetails } from "./util";
+import path from "path";
+import * as fs from "fs";
 export interface VSCodePublishedExtension extends PublishedExtension {
 	publisher: { displayName: string; publisherName: string };
 }
@@ -57,12 +59,19 @@ export class GalleryApi {
 		);
 	}
 
-	async downloadExtension(
-		extension: VSCodePublishedExtension,
-		version: string | undefined
-	): Promise<{ filename: string; data: Buffer }> {
+	downloadExtension(extension: VSCodePublishedExtension, version: string | undefined) {
 		const extensionVersion = getLatestExtensionVersion(extension, version);
-		const response = await fetch(extensionVersion.details[0].assetUrl, {
+		extensionVersion.details.forEach(async (element) => {
+			const response = await this.downloadPayload(extension, element);
+			this.savePayload(response);
+		});
+	}
+
+	async downloadPayload(
+		extension: VSCodePublishedExtension,
+		versionDetails: VersionDetails
+	): Promise<{ filename: string; data: Buffer }> {
+		const response = await fetch(versionDetails.assetUrl, {
 			method: "GET",
 			headers: {
 				Accept: "application/octet-stream",
@@ -73,7 +82,7 @@ export class GalleryApi {
 			throw new Error(`Failed to download extension ${extension.extensionName}`);
 		}
 
-		const extensionFilename = this.getFilename(extension, extensionVersion);
+		const extensionFilename = this.getFilename(extension, versionDetails);
 		console.log(`Downloading ${extensionFilename}`);
 
 		const contentLength = response.headers.get("Content-Length");
@@ -93,8 +102,8 @@ export class GalleryApi {
 			chunks.push(value!);
 
 			// Calculate progress percentage
-			const progress = totalBytes > 0 ? (downloadedBytes / totalBytes) * 100 : 0;
-			console.log(`Downloaded ${progress.toFixed(2)}%`);
+			// const progress = totalBytes > 0 ? (downloadedBytes / totalBytes) * 100 : 0;
+			// console.log(`Downloaded ${progress.toFixed(2)}%`);
 
 			// You can also update a progress bar or display a message to the user here
 		}
@@ -104,9 +113,19 @@ export class GalleryApi {
 		return { filename: extensionFilename, data: Buffer.from(buffer) };
 	}
 
-	getFilename(extension: VSCodePublishedExtension, extnVersion: ExtensionVersionGroup): string {
-		const version = extnVersion.version.raw;
-		const targetPlatform = extnVersion.details[0].targetPlatform;
+	savePayload(response: { filename: string; data: Buffer }) {
+		const filePath = path.join(__dirname, response.filename);
+		fs.writeFile(filePath, response.data, (err) => {
+			if (err) {
+				console.error(err);
+			}
+		});
+		console.log(`Saved ${response.filename}`);
+	}
+
+	getFilename(extension: VSCodePublishedExtension, extensDetails: VersionDetails): string {
+		const version = extensDetails.version;
+		const targetPlatform = extensDetails.targetPlatform;
 
 		if (targetPlatform === undefined) {
 			return `${extension.publisher.publisherName}.${extension.extensionName}-${version}.vsix`;

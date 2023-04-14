@@ -3,7 +3,6 @@ import { ExtensionVersion } from "azure-devops-node-api/interfaces/GalleryInterf
 import * as semver from "semver";
 
 const marketplaceUrl = "https://marketplace.visualstudio.com/_apis/public/gallery";
-type VersionDetails = { lastUpdated: Date; targetPlatform: string | undefined; assetUrl: string };
 
 export function getPublicGalleryAPIUrl() {
 	return new GalleryApi(marketplaceUrl, "3.0-preview.1");
@@ -16,6 +15,7 @@ export function versionGroup(versionList: ExtensionVersion[], maxVersions = 5): 
 			acc[versionString] = [];
 		}
 		acc[versionString].push({
+			version: version.version!,
 			lastUpdated: version.lastUpdated!,
 			targetPlatform: version.targetPlatform,
 			assetUrl: `${version.assetUri!}/Microsoft.VisualStudio.Services.VSIXPackage`,
@@ -50,6 +50,12 @@ export function getLatestExtensionVersion(
 	}
 }
 
+export interface VersionDetails {
+	version: string;
+	lastUpdated: Date;
+	targetPlatform: string | undefined;
+	assetUrl: string;
+}
 export interface ExtensionVersionGroup {
 	readonly version: semver.SemVer;
 	readonly details: VersionDetails[];
