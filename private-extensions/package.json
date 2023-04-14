@@ -40,7 +40,7 @@
         {
           "id": "private-extension-activitybar",
           "title": "Private Extensions",
-          "icon": "icons/terminal.svg"
+          "icon": "icons/private-extension.svg"
         }
       ]
     },
