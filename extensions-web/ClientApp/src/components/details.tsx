@@ -61,7 +61,7 @@ const DetailsPage = () => {
 	};
 
 	return (
-		<div style={{ margin: "24px" }}>
+		<div>
 			<PackageList datasource={extensionPackage ? [extensionPackage] : []} version={version} />
 			<Divider />
 			<Space direction="horizontal">
