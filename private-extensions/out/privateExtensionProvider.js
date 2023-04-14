@@ -22,7 +22,8 @@ class PrivateExtensionProvider {
             return [];
         }
         const prerelease = (0, utlis_1.getPrerelease)();
-        const res = await axios_1.default.get(`${url}/extension?prerelease=${prerelease}`);
+        url = (0, utlis_1.flattenUrl)(`${url}extension?prerelease=${prerelease}`);
+        const res = await axios_1.default.get(url);
         if (res.status !== axios_1.default.HttpStatusCode.Ok) {
             return [];
         }
