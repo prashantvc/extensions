@@ -22,7 +22,7 @@ public class Utilities
     public static string OutputDirectory(IWebHostEnvironment environment)
     {
         string outputDirectory = "output";
-        outputDirectory = Path.Combine(environment.ContentRootPath, "ClientApp/public", outputDirectory);
+        outputDirectory = Path.Combine(environment.ContentRootPath, outputDirectory);
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
