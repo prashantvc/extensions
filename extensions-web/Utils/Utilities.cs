@@ -3,7 +3,7 @@ public class Utilities
     public static string UploadDirectory(IWebHostEnvironment environment)
     {
         string uploadDirectory = "uploads";
-        uploadDirectory = Path.Combine(environment.ContentRootPath, uploadDirectory);
+        uploadDirectory = Path.Combine(environment.WebRootPath ?? ".", uploadDirectory);
         if (!Directory.Exists(uploadDirectory))
         {
             Directory.CreateDirectory(uploadDirectory);
@@ -22,7 +22,10 @@ public class Utilities
     public static string OutputDirectory(IWebHostEnvironment environment)
     {
         string outputDirectory = "output";
-        outputDirectory = Path.Combine(environment.ContentRootPath, outputDirectory);
+
+        string contentPath = environment.WebRootPath ?? Path.Combine(environment.ContentRootPath, "ClientApp/public");
+
+        outputDirectory = Path.Combine(contentPath, outputDirectory);
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
