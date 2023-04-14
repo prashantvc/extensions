@@ -1,5 +1,5 @@
 import { Divider, Dropdown, MenuProps, Space, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { IExtension } from "../data/extension";
 import { ExtensionPackage } from "../data/extensionPackage";
@@ -61,7 +61,7 @@ const DetailsPage = () => {
 	};
 
 	return (
-		<div style={{ margin: "24px" }}>
+		<Fragment>
 			<PackageList datasource={extensionPackage ? [extensionPackage] : []} version={version} />
 			<Divider />
 			<Space direction="horizontal">
@@ -82,7 +82,7 @@ const DetailsPage = () => {
 			<div className="markdown-body">
 				<ReactMarkdown children={readme} remarkPlugins={[remarkGfm]} skipHtml={true} />
 			</div>
-		</div>
+		</Fragment>
 	);
 };
 
