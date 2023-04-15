@@ -65,7 +65,13 @@ public class ExtensionController : ControllerBase
         catch (LiteDB.LiteException exception)
         {
             _logger.LogError(exception, exception.Message);
-            return Conflict($"{package.DisplayName}, v{package.Version} already exists");
+            CleanUploadsOnError(fileOnServer);
+
+            string identifier = package.Target == DefaulTarget
+            ? $"{package.DisplayName} v{package.Version}"
+            : $"{package.DisplayName} v{package.Version} for {package.Target}";
+
+            return Conflict($"{identifier} already exists");
         }
 
         MoveUploadedFile(fileOnServer);
@@ -93,6 +99,17 @@ public class ExtensionController : ControllerBase
             return NotFound();
 
         return PhysicalFile(fileOnServer, "application/octet-stream", package.Location);
+    }
+
+    void CleanUploadsOnError(string fileOnServer)
+    {
+        System.IO.File.Delete(fileOnServer);
+
+        string uploadDirectory = Utilities.OutputDirectory(_environment);
+        string folder = Path.GetFileNameWithoutExtension(fileOnServer);
+        string outputFolder = Path.Combine(uploadDirectory, folder);
+
+        System.IO.Directory.Delete(outputFolder, true);
     }
 
     void MoveUploadedFile(string fileOnServer)
@@ -142,4 +159,6 @@ public class ExtensionController : ControllerBase
     readonly IPackageReader _manifestReader;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<ExtensionController> _logger;
+
+    const string DefaulTarget = "any";
 }
