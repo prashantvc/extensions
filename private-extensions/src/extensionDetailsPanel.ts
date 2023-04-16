@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ExtensionPackage } from "./extensionPackage";
-import { getExtensionSource } from "./utlis";
+import { flattenUrl, getExtensionSource } from "./utlis";
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
 	return {
@@ -57,8 +57,8 @@ export class ExtensionDetailsPanel {
 		this._panel.webview.onDidReceiveMessage(
 			(message) => {
 				switch (message.command) {
-					case "alert":
-						vscode.window.showErrorMessage(message.text);
+					case "install":
+						vscode.window.showInformationMessage(message.text);
 						return;
 				}
 			},
@@ -96,6 +96,7 @@ export class ExtensionDetailsPanel {
 	private _getHtmlForWebview(webview: vscode.Webview, item: ExtensionPackage) {
 		// Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "markdown-it.min.js"));
+		const webviewScript = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "webview.js"));
 
 		// Do the same for the stylesheet
 		const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
@@ -103,7 +104,7 @@ export class ExtensionDetailsPanel {
 
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
-		const baseUrl = getExtensionSource();
+		const baseUrl = flattenUrl(getExtensionSource());
 
 		return /*html*/ `
     <!DOCTYPE html>
@@ -139,39 +140,11 @@ export class ExtensionDetailsPanel {
   </div>
 </div>
 <hr />
-<button class="btn btn-primary" id="installButton">Refactor</button>
+<button class="btn btn-primary" id="installButton" data-extension=${item.identifier}>Refactor</button>
 <hr />
-    <div id="markdown"></div>
-    <script>(
-      function() {
-      const vscode = acquireVsCodeApi();
-      function doRefactor() {
-        console.log("doRefactor");
-        vscode.postMessage({
-          command: "alert",
-          text: "Hello from the webview!",
-        });
-      }
-
-      const installButton = document.getElementById("installButton");
-      installButton.addEventListener("click", doRefactor);
-      fetch(
-        "${baseUrl}/${item.mainExtension.readmePath}"
-      )
-      .then((response) => response.text())
-      .then((data) => {
-        const md = window.markdownit({
-          html: true,
-          linkify: true,
-          typographer: true,
-        });
-        const html = md.render(data);
-        const markdown = document.getElementById("markdown");
-        markdown.innerHTML = html;
-      });
-    }())
-    </script>
+    <div id="markdownDiv" data-markdown-path="${baseUrl}/${item.mainExtension.readmePath}"></div>
     <script nonce="${nonce}" src="${scriptUri}"></script>
+    <script nonce="${nonce}" src="${webviewScript}"></script>
   </body>
 </html>
 `;
