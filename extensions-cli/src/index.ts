@@ -2,8 +2,9 @@
 
 import { Command } from "commander";
 import { showExtension } from "./showExtension";
-import { downloadExtensionById } from "./downloadExtension";
-import { repoCommand } from "./repoCommands";
+import { downloadExtensionById } from "./service/downloadExtension";
+import { repoCommand } from "./commands/repoCommands";
+import { extensionCommand } from "./commands/extensionCommand";
 
 const pkg = require("../package.json");
 const program = new Command();
@@ -25,6 +26,7 @@ program
 	.action(showExtension);
 
 program.addCommand(repoCommand);
+program.addCommand(extensionCommand);
 
 program.parseAsync(process.argv).catch((err) => {
 	console.error(err);

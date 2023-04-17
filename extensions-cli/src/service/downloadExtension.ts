@@ -1,6 +1,4 @@
-import path from "path";
-import { getPublicGalleryAPIUrl, versionGroup } from "./util";
-import * as fs from "fs";
+import { getPublicGalleryAPIUrl } from "../util";
 
 export async function downloadExtensionById(identifier: string, options: { version: string; recursive: boolean }) {
 	let extension = await getPublicGalleryAPIUrl().getExtensionById(identifier);

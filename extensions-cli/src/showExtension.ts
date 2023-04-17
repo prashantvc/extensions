@@ -1,5 +1,5 @@
 import { getPublicGalleryAPIUrl, versionGroup } from "./util";
-import { VSCodePublishedExtension } from "./galleryapi";
+import { VSCodePublishedExtension } from "./service/galleryapi";
 
 export async function showExtension(identifier: string) {
 	const extension = await getPublicGalleryAPIUrl().getExtensionById(identifier);

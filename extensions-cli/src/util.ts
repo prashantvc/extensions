@@ -1,4 +1,4 @@
-import { GalleryApi, VSCodePublishedExtension } from "./galleryapi";
+import { GalleryApi, VSCodePublishedExtension } from "./service/galleryapi";
 import { ExtensionVersion } from "azure-devops-node-api/interfaces/GalleryInterfaces";
 import * as semver from "semver";
 
