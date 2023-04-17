@@ -65,7 +65,6 @@ public class ExtensionController : ControllerBase
         catch (LiteDB.LiteException exception)
         {
             _logger.LogError(exception, exception.Message);
-            CleanUploadsOnError(fileOnServer);
 
             string identifier = package.Target == DefaulTarget
             ? $"{package.DisplayName} v{package.Version}"

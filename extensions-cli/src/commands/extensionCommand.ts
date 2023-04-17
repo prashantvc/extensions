@@ -1,8 +1,8 @@
 import { Command } from "commander";
-import path from "path";
 import * as fs from "fs";
 import * as url from "url";
 import axios from "axios";
+import https from "https";
 
 export const extensionCommand = new Command("extension");
 const FormData = require("form-data");
@@ -14,7 +14,7 @@ extensionCommand
 	.argument("url", "A valid private extension repository URL")
 	.action(addExtension);
 
-function addExtension(file: string, urlString: string) {
+async function addExtension(file: string, urlString: string) {
 	const filePath = file.replace("~", process.env.HOME!);
 	if (!fs.existsSync(filePath)) {
 		console.error(`File '${filePath}' does not exist.`);
@@ -28,30 +28,36 @@ function addExtension(file: string, urlString: string) {
 	}
 
 	urlString = `${url.format(parsedUrl)}extension`;
-	uploadFile(filePath, urlString);
+	await uploadFile(filePath, urlString);
 }
 
 async function uploadFile(file: string, urlString: string) {
 	let data = new FormData();
 	let fstream = fs.createReadStream(file);
-	data.append("file", file);
+	data.append("file", fstream);
+
+	const agent = new https.Agent({
+		rejectUnauthorized: false,
+	});
 
 	let config = {
-		method: "post",
+		method: "POST",
 		maxBodyLength: Infinity,
 		url: urlString,
 		data: data,
 		headers: {
 			...data.getHeaders(),
 		},
+		httpsAgent: agent,
 	};
-
-	axios
-		.request(config)
-		.then((response) => {
-			console.log(response.data);
-		})
-		.catch((error) => {
-			console.log(error);
-		});
+	try {
+		const response = await axios.request(config);
+		if (response.status === 200) {
+			console.log(`Extension uploaded successfully.`);
+		}
+	} catch (err) {
+		console.error("\n Upload failed");
+	}
 }
+
+//"extension" "add" "~/downloads/Egeye.or-vs-demo-1.0.0.vsix" "http://private-extensions.azurewebsites.net/"

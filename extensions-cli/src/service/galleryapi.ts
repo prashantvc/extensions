@@ -6,7 +6,7 @@ import {
 	TypeInfo,
 } from "azure-devops-node-api/interfaces/GalleryInterfaces";
 import { ContractSerializer } from "azure-devops-node-api/Serialization";
-import { ExtensionVersionGroup, getLatestExtensionVersion, VersionDetails } from "../util";
+import { getLatestExtensionVersion, VersionDetails } from "../util";
 import path from "path";
 import * as fs from "fs";
 
