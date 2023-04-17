@@ -57,10 +57,24 @@ public class ExtensionController : ControllerBase
         }
 
         var package = _manifestReader.ExtractPackage(fileOnServer);
-        var result = _databaseService.InsertPackage(package);
+
+        try
+        {
+            var result = _databaseService.InsertPackage(package);
+        }
+        catch (LiteDB.LiteException exception)
+        {
+            _logger.LogError(exception, exception.Message);
+            CleanUploadsOnError(fileOnServer);
+
+            string identifier = package.Target == DefaulTarget
+            ? $"{package.DisplayName} v{package.Version}"
+            : $"{package.DisplayName} v{package.Version} for {package.Target}";
+
+            return Conflict($"{identifier} already exists");
+        }
 
         MoveUploadedFile(fileOnServer);
-
         return Created($"/{package.Identifier}", package);
 
         static bool IsExtensionAllowed(string fileName)
@@ -85,6 +99,17 @@ public class ExtensionController : ControllerBase
             return NotFound();
 
         return PhysicalFile(fileOnServer, "application/octet-stream", package.Location);
+    }
+
+    void CleanUploadsOnError(string fileOnServer)
+    {
+        System.IO.File.Delete(fileOnServer);
+
+        string uploadDirectory = Utilities.OutputDirectory(_environment);
+        string folder = Path.GetFileNameWithoutExtension(fileOnServer);
+        string outputFolder = Path.Combine(uploadDirectory, folder);
+
+        System.IO.Directory.Delete(outputFolder, true);
     }
 
     void MoveUploadedFile(string fileOnServer)
@@ -121,13 +146,19 @@ public class ExtensionController : ControllerBase
     public ExtensionController(
         [NotNull] IDatabaseService databaseService,
         IWebHostEnvironment environment,
-        IPackageReader manifestReader)
+        IPackageReader manifestReader,
+        ILogger<ExtensionController> logger)
     {
         _databaseService = databaseService;
         _environment = environment;
         _manifestReader = manifestReader;
+        _logger = logger;
+        _logger.LogInformation("Initialised {0}", typeof(ExtensionController));
     }
     readonly IDatabaseService _databaseService;
     readonly IPackageReader _manifestReader;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<ExtensionController> _logger;
+
+    const string DefaulTarget = "any";
 }

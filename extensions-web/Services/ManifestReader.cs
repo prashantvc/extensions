@@ -37,14 +37,17 @@ public class PackageReader : IPackageReader
 
         string extractFilePath = Path.Combine(outputDirectory, fileName, extractFileName);
 
-        Utilities.CreateDirectory(extractFilePath);
-
-        using (var archive = ZipFile.OpenRead(fileOnServer))
+        bool fileExist = File.Exists(extractFilePath);
+        if (!fileExist)
         {
-            var manifestEntry = archive.GetEntry(extractFileName);
-            if (manifestEntry != null)
+            Utilities.CreateDirectory(extractFilePath);
+            using (var archive = ZipFile.OpenRead(fileOnServer))
             {
-                manifestEntry.ExtractToFile(extractFilePath);
+                var manifestEntry = archive.GetEntry(extractFileName);
+                if (manifestEntry != null)
+                {
+                    manifestEntry.ExtractToFile(extractFilePath);
+                }
             }
         }
 

@@ -16,3 +16,16 @@ html {
 .box-shadow {
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
+
+header {
+  z-index: 100;
+  background-color: white;
+  position: fixed;
+  width: 100%;
+  text-align: center;
+}
+
+.main {
+  padding-top: 84px;
+  padding-bottom: 5%;
+}
