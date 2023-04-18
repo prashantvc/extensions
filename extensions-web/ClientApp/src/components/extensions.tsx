@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import { Button, message, Upload, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { UploadChangeParam } from "antd/es/upload/interface";
-import { Extension, IExtension } from "../data/extension";
+import { IExtension } from "../data/extension";
 import { PackageList } from "./packageList";
 import { ExtensionPackage } from "../data/extensionPackage";
 
@@ -15,6 +15,7 @@ export class Extensions extends React.Component<
 		extensions: ExtensionPackage[];
 		loading: boolean;
 		showPrerelease: boolean;
+		requireUploadAPIKey: boolean;
 	}
 > {
 	static displayName = Extensions.name;
@@ -38,16 +39,18 @@ export class Extensions extends React.Component<
 
 	constructor(props: any) {
 		super(props);
-		this.state = { extensions: [], loading: true, showPrerelease: false };
+		this.state = { extensions: [], loading: true, showPrerelease: false, requireUploadAPIKey: false };
 	}
 
 	public render() {
 		return (
 			<Fragment>
 				<Space align="center" size="large">
-					<Upload name="file" action="extension" onChange={this.onChange}>
-						<Button icon={<PlusOutlined />}>Upload Extension</Button>
-					</Upload>
+					{!this.state.requireUploadAPIKey && (
+						<Upload name="file" action="extension" onChange={this.onChange}>
+							<Button icon={<PlusOutlined />}>Upload Extension</Button>
+						</Upload>
+					)}
 					<Space>
 						<Text>Show pre-release</Text>
 						<Switch onChange={this.onSwitchChange} />
@@ -60,7 +63,16 @@ export class Extensions extends React.Component<
 	}
 
 	componentDidMount(): void {
+		this.getUploadUIState();
 		this.populateExtensions();
+	}
+
+	async getUploadUIState() {
+		const response = await fetch("extension/RequireUploadAPIKey");
+		if (response.status === 200) {
+			const { requireUploadAPIKey } = await response.json();
+			this.setState({ requireUploadAPIKey });
+		}
 	}
 
 	async populateExtensions() {
