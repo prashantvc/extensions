@@ -13,8 +13,8 @@ public class DatabaseService : IDatabaseService
             throw new InvalidOperationException("Version is not SemVer compliant.");
         }
 
+        Packages.EnsureIndex("extensionid", p => new { p.Identifier, p.Version, p.Target }, true);
         var pkg = Packages.Insert(package);
-        Packages.EnsureIndex(p => p.Identifier);
 
         return pkg;
     }

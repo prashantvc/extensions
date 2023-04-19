@@ -1,0 +1,29 @@
+site_name: Private Extensions
+site_description: A lightweight NuGet and symbol server
+site_author: Prashant Cholachagudda
+site_url: https://colorcodehq.com
+
+copyright: "Copyright &copy; 2023 Color Code"
+theme:
+    name: readthedocs
+
+extra:
+    social:
+        - type: github-alt
+          link: https://github.com/prashantvc
+        - type: twitter
+          link: https://twitter.com/prshntvc
+
+markdown_extensions:
+    - markdown.extensions.admonition
+    - markdown.extensions.codehilite:
+          guess_lang: false
+    - markdown.extensions.toc:
+          permalink: true
+
+nav:
+    - Overview: index.md
+    - Installation:
+          - Local: installation/local.md
+    - Configuration: configuration.md
+    - VS Code Integration: vs-code-integration.md
