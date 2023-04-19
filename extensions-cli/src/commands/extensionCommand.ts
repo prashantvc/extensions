@@ -12,9 +12,10 @@ extensionCommand
 	.description("Upload an extension to a private extension repository")
 	.argument("file", "The extension file to upload")
 	.argument("url", "A valid private extension repository URL")
+	.option("-a, --api-key <key>", "The API key to upload an extension")
 	.action(addExtension);
 
-async function addExtension(file: string, urlString: string) {
+async function addExtension(file: string, urlString: string, options: { apiKey: string }) {
 	const filePath = file.replace("~", process.env.HOME!);
 	if (!fs.existsSync(filePath)) {
 		console.error(`File '${filePath}' does not exist.`);
@@ -28,10 +29,10 @@ async function addExtension(file: string, urlString: string) {
 	}
 
 	urlString = `${url.format(parsedUrl)}extension`;
-	await uploadFile(filePath, urlString);
+	await uploadFile(filePath, urlString, options?.apiKey);
 }
 
-async function uploadFile(file: string, urlString: string) {
+async function uploadFile(file: string, urlString: string, apiKey: string) {
 	let data = new FormData();
 	let fstream = fs.createReadStream(file);
 	data.append("file", fstream);
@@ -46,6 +47,7 @@ async function uploadFile(file: string, urlString: string) {
 		url: urlString,
 		data: data,
 		headers: {
+			"x-api-key": apiKey ?? "",
 			...data.getHeaders(),
 		},
 		httpsAgent: agent,
