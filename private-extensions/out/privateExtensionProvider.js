@@ -51,7 +51,7 @@ class ExtensionView extends vscode.TreeItem {
         this.tooltip = extension.description;
         this.iconPath = new vscode.ThemeIcon("extensions");
         this.command = {
-            command: "private-extensions.select",
+            command: utlis_1.AppConstants.commandSelect,
             title: "",
             arguments: [extension],
         };
