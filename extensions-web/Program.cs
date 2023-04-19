@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ if (!app.Environment.IsDevelopment())
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseFileServer(new FileServerOptions { StaticFileOptions = { ServeUnknownFileTypes = true } });
 }
 
 app.UseCors(builder =>
@@ -36,8 +38,8 @@ app.UseCors(builder =>
 
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.UseRouting();
+
 
 app.MapControllerRoute(
     name: "default",
