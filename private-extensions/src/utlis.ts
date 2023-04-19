@@ -13,7 +13,8 @@ import { ExtensionPackage } from "./extensionPackage";
  */
 export async function installExtension(item: ExtensionPackage, ctx: vscode.ExtensionContext): Promise<boolean> {
 	console.log(`Installing ${item.displayName}`);
-	const downloadUrl = `${getExtensionSource()}/extension/download/${item.identifier}/${item.version}`;
+	let downloadUrl = `${getExtensionSource()}extension/download/${item.identifier}/${item.version}`;
+	downloadUrl = flattenUrl(downloadUrl);
 
 	const downloadDirectory = getDownloadDirectory(ctx).fsPath;
 	if (!fs.existsSync(downloadDirectory)) {
@@ -69,9 +70,24 @@ export function getExtensionSource(): string {
  * @returns True if prerelease versions should be included, false otherwise.
  */
 export function getPrerelease(): boolean {
-	return vscode.workspace.getConfiguration("").get<boolean>("privateExtensions.Prerelease") ?? false;
+	return vscode.workspace.getConfiguration("").get<boolean>(AppConstants.configPrerelease) ?? false;
 }
 
 export function flattenUrl(url: string) {
-	return url.replace(/\/+$/, "");
+	return url.replace(/\/+$/, "/");
+}
+
+export class AppConstants {
+	static commandRefresh: string = "private-extensions.refresh";
+	static commandSelect: string = "privateExtensions.select";
+	static commandAddSource: string = "private-extensions.addSource";
+	static commandPrerelease: string = "private-extensions.prerelease";
+	static commandInstall: string = "private-extensions.install";
+
+	static configSource: string = "privateExtensions.Source";
+	static configPrerelease: string = "privateExtensions.Prerelease";
+
+	static treeViewId: string = "private-extensions";
+
+	static messageInstall: string = "install";
 }

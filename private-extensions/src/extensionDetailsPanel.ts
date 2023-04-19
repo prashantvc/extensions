@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ExtensionPackage } from "./extensionPackage";
-import { flattenUrl, getExtensionSource } from "./utlis";
+import { AppConstants, flattenUrl, getExtensionSource } from "./utlis";
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
 	return {
@@ -57,7 +57,7 @@ export class ExtensionDetailsPanel {
 		this._panel.webview.onDidReceiveMessage(
 			(message) => {
 				switch (message.command) {
-					case "install":
+					case AppConstants.messageInstall:
 						vscode.window.showInformationMessage(message.text);
 						return;
 				}
@@ -65,12 +65,6 @@ export class ExtensionDetailsPanel {
 			null,
 			this._disposables
 		);
-	}
-
-	public doRefactor() {
-		// Send a message to the webview webview.
-		// You can send any JSON serializable data.
-		this._panel.webview.postMessage({ command: "refactor" });
 	}
 
 	public dispose() {

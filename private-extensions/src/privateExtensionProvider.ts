@@ -2,7 +2,7 @@ import axios from "axios";
 import * as vscode from "vscode";
 import { IExtension } from "./extensionData";
 import { ExtensionPackage } from "./extensionPackage";
-import { flattenUrl, getExtensionSource, getPrerelease } from "./utlis";
+import { AppConstants, flattenUrl, getExtensionSource, getPrerelease } from "./utlis";
 
 export class PrivateExtensionProvider implements vscode.TreeDataProvider<ExtensionPackage> {
 	getTreeItem(element: ExtensionPackage): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -63,7 +63,7 @@ class ExtensionView extends vscode.TreeItem {
 		this.tooltip = extension.description;
 		this.iconPath = new vscode.ThemeIcon("extensions");
 		this.command = {
-			command: "private-extensions.select",
+			command: AppConstants.commandSelect,
 			title: "",
 			arguments: [extension],
 		};
