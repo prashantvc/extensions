@@ -101,11 +101,12 @@ public class ExtensionController : ControllerBase
             return NotFound();
 
         string outputDirectory = Utilities.OutputDirectory(_environment);
-        string fileOnServer = $"{Path.Combine(outputDirectory, package.Location)}.vsix";
+        string fileName = $"{package.Location}.vsix";
+        string fileOnServer = Path.Combine(outputDirectory, fileName);
         if (!System.IO.File.Exists(fileOnServer))
             return NotFound();
 
-        return PhysicalFile(fileOnServer, "application/octet-stream", package.Location);
+        return PhysicalFile(fileOnServer, "application/octet-stream", fileName);
     }
 
     [HttpGet("RequireUploadAPIKey")]
