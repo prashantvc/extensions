@@ -5,77 +5,77 @@
 //   const package = Convert.toPackage(json);
 
 export interface IExtension {
-    metadata: Metadata;
-    assets: Asset[];
-    identifier: string;
-    isPreRelease: boolean;
-    version: string;
-    target: string;
-    categories: string[];
-    displayName: string;
-    description: string;
-    location: string;
-    relativeIconPath: string;
-    relativeReadmePath: string;
+	metadata: Metadata;
+	assets: Asset[];
+	identifier: string;
+	isPreRelease: boolean;
+	version: string;
+	target: string;
+	categories: string[];
+	displayName: string;
+	description: string;
+	location: string;
+	relativeIconPath: string;
+	relativeReadmePath: string;
 }
 
 export class Extension {
-    constructor(extensionPackage: IExtension) {
-        this.extension = extensionPackage;
-    }
-    public get packagePath(): string {
-        var packagePath = `${this.extensionPath}.vsix`
-        return packagePath;
-    }
-    public get iconPath(): string {
-        let path = this.extension.relativeIconPath;
-        if (path === undefined || path === null) {
-            return "default_icon_128.png";
-        }
+	constructor(extensionPackage: IExtension) {
+		this.extension = extensionPackage;
+	}
+	public get packagePath(): string {
+		var packagePath = `${this.extensionPath}.vsix`;
+		return packagePath;
+	}
+	public get iconPath(): string {
+		let path = this.extension.relativeIconPath;
+		if (path === undefined || path === null) {
+			return "default_icon_128.png";
+		}
 
-        var iconPath = `${this.extensionPath}/${path}`;
-        return iconPath;
-    }
-    public get readmePath(): string {
-        let path = this.extension.relativeReadmePath;
-        return this.extensionPath + "/" + path;
-    }
+		var iconPath = `${this.extensionPath}/${path}`;
+		return iconPath;
+	}
+	public get readmePath(): string {
+		let path = this.extension.relativeReadmePath;
+		return this.extensionPath + "/" + path;
+	}
 
-    get extensionPath(): string {
-        return `output/${this.extension.location}`;
-    }
+	get extensionPath(): string {
+		return `output/${this.extension.location}`;
+	}
 
-    extension: IExtension;
+	extension: IExtension;
 }
 
 export interface Asset {
-    assetType: string;
-    path: string;
+	assetType: string;
+	path: string;
 }
 
 export interface Metadata {
-    identity: Identity;
-    displayName: string;
-    categoryString: string;
-    categories: string[];
-    description: string;
+	identity: Identity;
+	displayName: string;
+	categoryString: string;
+	categories: string[];
+	description: string;
 }
 
 export interface Identity {
-    language: string;
-    id: string;
-    version: string;
-    publisher: string;
-    targetPlatform: string;
+	language: string;
+	id: string;
+	version: string;
+	publisher: string;
+	targetPlatform: string;
 }
 
 // Converts JSON strings to/from your types
 export class Convert {
-    public static toPackage(json: string): IExtension {
-        return JSON.parse(json);
-    }
+	public static toPackage(json: string): IExtension {
+		return JSON.parse(json);
+	}
 
-    public static packageToJson(value: IExtension): string {
-        return JSON.stringify(value);
-    }
+	public static packageToJson(value: IExtension): string {
+		return JSON.stringify(value);
+	}
 }
