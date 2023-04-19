@@ -44,6 +44,14 @@ public class ExtensionController : ControllerBase
     [HttpPost, DisableRequestSizeLimit]
     public async Task<IActionResult> AddExtensionsAsync(IFormFile file)
     {
+        //read api key from request header
+        if (RequireUploadAPIKey)
+        {
+            string apiKey = Request.Headers["x-api-key"];
+            if (string.IsNullOrWhiteSpace(apiKey) || apiKey != UploadAPIKey)
+                return Unauthorized("Missing or invalid API key");
+        }
+
         string filePath = file.FileName;
         if (!IsExtensionAllowed(filePath))
             return BadRequest("Bad extension");
@@ -65,7 +73,6 @@ public class ExtensionController : ControllerBase
         catch (LiteDB.LiteException exception)
         {
             _logger.LogError(exception, exception.Message);
-            CleanUploadsOnError(fileOnServer);
 
             string identifier = package.Target == DefaulTarget
             ? $"{package.DisplayName} v{package.Version}"
@@ -100,6 +107,23 @@ public class ExtensionController : ControllerBase
 
         return PhysicalFile(fileOnServer, "application/octet-stream", package.Location);
     }
+
+    [HttpGet("RequireUploadAPIKey")]
+    public IActionResult GetUploadUIState()
+    {
+        return Ok(new { RequireUploadAPIKey = RequireUploadAPIKey });
+    }
+
+    bool RequireUploadAPIKey
+    {
+        get
+        {
+            var apiKey = _config.GetValue<string>(APIKey);
+            return !string.IsNullOrWhiteSpace(apiKey);
+        }
+    }
+
+    string UploadAPIKey => _config.GetValue<string>(APIKey)!;
 
     void CleanUploadsOnError(string fileOnServer)
     {
@@ -147,18 +171,21 @@ public class ExtensionController : ControllerBase
         [NotNull] IDatabaseService databaseService,
         IWebHostEnvironment environment,
         IPackageReader manifestReader,
-        ILogger<ExtensionController> logger)
+        ILogger<ExtensionController> logger,
+        IConfiguration config)
     {
         _databaseService = databaseService;
         _environment = environment;
         _manifestReader = manifestReader;
         _logger = logger;
-        _logger.LogInformation("Initialised {0}", typeof(ExtensionController));
+        _config = config;
     }
     readonly IDatabaseService _databaseService;
     readonly IPackageReader _manifestReader;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<ExtensionController> _logger;
+    private readonly IConfiguration _config;
 
     const string DefaulTarget = "any";
+    const string APIKey = "ApiKey";
 }
