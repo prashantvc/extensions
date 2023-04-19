@@ -39,7 +39,7 @@ export class Extensions extends React.Component<
 
 	constructor(props: any) {
 		super(props);
-		this.state = { extensions: [], loading: true, showPrerelease: false, requireUploadAPIKey: false };
+		this.state = { extensions: [], loading: true, showPrerelease: false, requireUploadAPIKey: true };
 	}
 
 	public render() {
@@ -81,7 +81,6 @@ export class Extensions extends React.Component<
 
 		const response = await fetch(`extension?prerelease=${this.state.showPrerelease}`);
 		if (response.status === 204) {
-			console.log(response);
 			this.setState({ extensions: [], loading: false });
 			return;
 		}
