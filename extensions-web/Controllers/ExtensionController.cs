@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 public class ExtensionController : ControllerBase
 {
     [HttpGet("/extension")]
+    [ResponseCache(Duration = 60)]
     public IActionResult GetExtensions(bool prerelease = false)
     {
         var packagesList = GetPreReleasePackages(prerelease);
