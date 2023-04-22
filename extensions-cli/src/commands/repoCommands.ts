@@ -30,7 +30,7 @@ async function setRepository(urlString: string) {
 function showRepositoryDetails() {
 	const url = process.env[PRIVATE_EXTENSION_REPOSITORY];
 	if (!url) {
-		console.error("No active private extension repository, use 'repo add' to add one.\n");
+		console.error("No active private extension repository, use 'repo set' to add one.\n");
 		setRepoCommand.outputHelp();
 		return;
 	}
