@@ -15,7 +15,14 @@ export class Layout extends Component {
 					{this.props.children}
 				</Container>
 				<footer>
-					<Text type="secondary"> ©️ Colour Code - 2023</Text>
+					<div style={{ float: "left" }}>
+						<Text type="secondary">©️ Color Code Technologies - 2023</Text>
+					</div>
+					<div style={{ float: "right" }}>
+						<a href="mailto:contact@colorcodehq.com">
+							<Text type="secondary">support</Text>
+						</a>
+					</div>
 				</footer>
 			</Fragment>
 		);
