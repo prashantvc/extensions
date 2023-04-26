@@ -58,6 +58,7 @@ export class ExtensionDetailsPanel {
 			(message) => {
 				switch (message.command) {
 					case AppConstants.messageInstall:
+						//TODO: call install command
 						vscode.window.showInformationMessage(message.text);
 						return;
 				}
@@ -95,6 +96,7 @@ export class ExtensionDetailsPanel {
 		// Do the same for the stylesheet
 		const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
 		const styleGithub = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "gh.css"));
+		const styleMain = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "main.css"));
 
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
@@ -108,35 +110,34 @@ export class ExtensionDetailsPanel {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="${styleVSCodeUri}" rel="stylesheet">
     <link href="${styleGithub}" rel="stylesheet">
+	<link href="${styleMain}" rel="stylesheet">
 
     <title>${item.displayName}</title>
   </head>
   <body>
-  <div class="col-sm-6 mb-3 mb-sm-0">
-  <div class="row g-0">
-    <div class="col-md-4">
-      <img
-        src="${baseUrl}/${item.mainExtension.iconPath}"
-        class="img-thumbnail img-fluid"
-        width="64"
-        height="64"
-      />
-    </div>
-    <div class="col-md-8">
-      <div class="card-body">
-        <h5 class="card-title">${item.displayName}</h5>
-        <p class="card-text">
-          <small class="text-body-secondary">v${item.version}</small>
-        </p>
-        <p class="card-text">${item.description}</p>
-      </div>
-    </div>
-  </div>
-</div>
+ 	<table border="0">
+			<tr>
+				<td rowspan="4">
+					<img
+						src="${baseUrl}/${item.mainExtension.iconPath}"
+						alt="missing-image"
+						class="extension-icon"
+					/>
+				</td>
+				<td style="height: 0%"><b>${item.displayName}</b></td>
+			</tr>
+			<tr>
+				<td><span class="identifier">${item.identifier}</span></td>
+			</tr>
+			<tr>
+				<td>${item.description}</td>
+			</tr>
+			<tr>
+				<td><button class="btn-custom" id="installButton" data-extension=${item.identifier}>Install</button></td>
+			</tr>
+		</table>
 <hr />
-<button class="btn btn-primary" id="installButton" data-extension=${item.identifier}>Refactor</button>
-<hr />
-    <div id="markdownDiv" data-markdown-path="${baseUrl}/${item.mainExtension.readmePath}"></div>
+    <div id="markdownDiv" data-markdown-path="${baseUrl}${item.mainExtension.readmePath}"></div>
     <script nonce="${nonce}" src="${scriptUri}"></script>
     <script nonce="${nonce}" src="${webviewScript}"></script>
   </body>

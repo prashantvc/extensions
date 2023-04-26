@@ -22,7 +22,11 @@ export async function installExtension(item: ExtensionPackage, ctx: vscode.Exten
 	}
 
 	const response = await axios.get(downloadUrl, { responseType: "stream" });
-	const fileName = `${item.identifier}-${item.version}.vsix`;
+	const fileName = getDownloadFilename(response.headers["content-disposition"]);
+	if (!fileName) {
+		return false;
+	}
+
 	const extensionPath = path.join(downloadDirectory, fileName);
 
 	const writer = fs.createWriteStream(extensionPath);
@@ -36,7 +40,7 @@ export async function installExtension(item: ExtensionPackage, ctx: vscode.Exten
 	console.log(`Download complete: ${extensionPath}`);
 
 	try {
-		await vscode.commands.executeCommand("workbench.extensions.installExtension", vscode.Uri.file(extensionPath));
+		await vscode.commands.executeCommand(AppConstants.commandWorkbenchInstall, vscode.Uri.file(extensionPath));
 		console.log(`Installed ${item.displayName}`);
 		fs.rmSync(extensionPath);
 		return true;
@@ -60,7 +64,7 @@ function getDownloadDirectory(ctx: vscode.ExtensionContext): vscode.Uri {
  * @returns The source URL for private extensions.
  */
 export function getExtensionSource(): string {
-	let url = vscode.workspace.getConfiguration("").get<string[]>("privateExtensions.Source");
+	let url = vscode.workspace.getConfiguration("").get<string[]>(AppConstants.configSource);
 
 	return url ? url[0] : "";
 }
@@ -73,8 +77,27 @@ export function getPrerelease(): boolean {
 	return vscode.workspace.getConfiguration("").get<boolean>(AppConstants.configPrerelease) ?? false;
 }
 
+/**
+ * Replaces any trailing slashes in the given URL with a single slash.
+ * @param {string} url - The URL to flatten.
+ * @returns {string} The flattened URL.
+ */
 export function flattenUrl(url: string) {
 	return url.replace(/\/+$/, "/");
+}
+
+/**
+ * Extracts the file name from the given header string.
+ * @param {string} headerString - The header string to extract the file name from.
+ * @returns {string | null} The extracted file name, or null if the file name could not be extracted.
+ */
+function getDownloadFilename(headerString: string): string | null {
+	const match = headerString.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i);
+	if (match) {
+		const fileName = match[1].replace(/['"]/g, "");
+		return decodeURIComponent(fileName);
+	}
+	return null;
 }
 
 export class AppConstants {
@@ -83,6 +106,7 @@ export class AppConstants {
 	static commandAddSource: string = "private-extensions.addSource";
 	static commandPrerelease: string = "private-extensions.prerelease";
 	static commandInstall: string = "private-extensions.install";
+	static commandWorkbenchInstall: string = "workbench.extensions.installExtension";
 
 	static configSource: string = "privateExtensions.Source";
 	static configPrerelease: string = "privateExtensions.Prerelease";
