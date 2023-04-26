@@ -2,9 +2,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Edge",
+            "name": "Launch Chrome",
             "request": "launch",
-            "type": "msedge",
+            "type": "chrome",
             "url": "https://localhost:7192",
             "webRoot": "${workspaceFolder}/ClientApp"
         },
@@ -39,7 +39,7 @@
             "name": "Server-Client",
             "configurations": [
                 ".NET Core Launch (web)",
-                "Launch Edge"
+                "Launch Chrome"
             ]
         }
     ]

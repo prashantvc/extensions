@@ -19,6 +19,7 @@ public class ExtensionController : ControllerBase
 
     [HttpGet]
     [Route("{id}/{version?}")]
+    [ResponseCache(Duration = CacheDuration)]
     public IActionResult GetExtension(string id, string version = "", bool prerelease = false)
     {
         var packages = _databaseService
@@ -189,4 +190,6 @@ public class ExtensionController : ControllerBase
 
     const string DefaulTarget = "any";
     const string APIKey = "ApiKey";
+
+    const int CacheDuration = 60 * 60 * 24;
 }
