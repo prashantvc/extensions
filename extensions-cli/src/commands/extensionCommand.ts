@@ -11,7 +11,10 @@ extensionCommand
 	.command("add")
 	.description("Upload an extension to a private extension repository")
 	.argument("file", "The extension file to upload")
-	.argument("url", "A valid private extension repository URL")
+	.argument(
+		"url",
+		"A valid private extension repository URL. Set PRIVATE_EXTENSION_REPOSITORY environment variable to avoid passing this argument."
+	)
 	.option("-a, --api-key <key>", "The API key to upload an extension")
 	.action(addExtension);
 
