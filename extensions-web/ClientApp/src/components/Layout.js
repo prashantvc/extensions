@@ -15,7 +15,9 @@ export class Layout extends Component {
 					{this.props.children}
 				</Container>
 				<footer>
-					<Text type="secondary"> ©️ Colour Code - 2023</Text>
+					<a href="mailto:contact@colorcodehq.com">
+						<Text type="secondary">Contact support</Text>
+					</a>
 				</footer>
 			</Fragment>
 		);

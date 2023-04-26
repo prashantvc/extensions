@@ -22,7 +22,8 @@ class PrivateExtensionProvider {
             return [];
         }
         const prerelease = (0, utlis_1.getPrerelease)();
-        const res = await axios_1.default.get(`${url}/extension?prerelease=${prerelease}`);
+        url = (0, utlis_1.flattenUrl)(`${url}extension?prerelease=${prerelease}`);
+        const res = await axios_1.default.get(url);
         if (res.status !== axios_1.default.HttpStatusCode.Ok) {
             return [];
         }
@@ -50,7 +51,7 @@ class ExtensionView extends vscode.TreeItem {
         this.tooltip = extension.description;
         this.iconPath = new vscode.ThemeIcon("extensions");
         this.command = {
-            command: "private-extensions.select",
+            command: utlis_1.AppConstants.commandSelect,
             title: "",
             arguments: [extension],
         };

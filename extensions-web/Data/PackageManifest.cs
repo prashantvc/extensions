@@ -8,7 +8,7 @@ public class ExtensionManifest
     [XmlArray("Assets")]
     [XmlArrayItem("Asset")]
     public List<Asset> Assets { get; set; }
-    public string Identifier => $"{Metadata.Identity.Id}";
+    public string Identifier => $"{Metadata.Identity.Publisher}.{Metadata.Identity.Id}";
     public bool IsPreRelease { get; set; }
     public string Version => Metadata.Identity.Version;
     public string Target => Metadata?.Identity?.TargetPlatform ?? "any";

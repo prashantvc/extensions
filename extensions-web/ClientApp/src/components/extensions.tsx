@@ -94,8 +94,6 @@ export class Extensions extends React.Component<
 			return [...acc, curr];
 		}, []);
 
-		console.info(uniqueExtensions);
-
 		const localExtensions = uniqueExtensions.map(
 			(p) => new ExtensionPackage(p.identifier, p.version, p.extensions)
 		);

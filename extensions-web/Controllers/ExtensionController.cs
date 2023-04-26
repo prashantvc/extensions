@@ -19,6 +19,7 @@ public class ExtensionController : ControllerBase
 
     [HttpGet]
     [Route("{id}/{version?}")]
+    [ResponseCache(Duration = CacheDuration)]
     public IActionResult GetExtension(string id, string version = "", bool prerelease = false)
     {
         var packages = _databaseService
@@ -101,11 +102,12 @@ public class ExtensionController : ControllerBase
             return NotFound();
 
         string outputDirectory = Utilities.OutputDirectory(_environment);
-        string fileOnServer = $"{Path.Combine(outputDirectory, package.Location)}.vsix";
+        string fileName = $"{package.Location}.vsix";
+        string fileOnServer = Path.Combine(outputDirectory, fileName);
         if (!System.IO.File.Exists(fileOnServer))
             return NotFound();
 
-        return PhysicalFile(fileOnServer, "application/octet-stream", package.Location);
+        return PhysicalFile(fileOnServer, "application/octet-stream", fileName);
     }
 
     [HttpGet("RequireUploadAPIKey")]
@@ -188,4 +190,6 @@ public class ExtensionController : ControllerBase
 
     const string DefaulTarget = "any";
     const string APIKey = "ApiKey";
+
+    const int CacheDuration = 60 * 60 * 24;
 }
