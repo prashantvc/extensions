@@ -38,3 +38,20 @@ body {
 	border: none;
 	margin: 0 auto;
 }
+
+table {
+	border: 1;
+	padding: 2;
+}
+td:first-child {
+	vertical-align: top;
+}
+.extension-icon {
+	border-radius: 5%;
+	max-width: 64px;
+	margin-top: 4px;
+	margin-right: 10px;
+}
+.identifier {
+	font-size: x-small;
+}
