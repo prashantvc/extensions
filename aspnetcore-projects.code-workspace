@@ -8,6 +8,7 @@
 		}
 	],
 	"settings": {
-		"dotnet-test-explorer.testProjectPath": "**/*tests.@(csproj|vbproj|fsproj)"
+		"dotnet-test-explorer.testProjectPath": "**/*tests.@(csproj|vbproj|fsproj)",
+		"dotnet.defaultSolution": "extensions.sln"
 	}
 }
