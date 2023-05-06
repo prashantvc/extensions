@@ -58,8 +58,7 @@ export class ExtensionDetailsPanel {
 			(message) => {
 				switch (message.command) {
 					case AppConstants.messageInstall:
-						//TODO: call install command
-						vscode.window.showInformationMessage(message.text);
+						vscode.commands.executeCommand(AppConstants.commandInstall, message.id);
 						return;
 				}
 			},

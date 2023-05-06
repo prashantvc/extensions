@@ -30,9 +30,8 @@ function main() {
  */
 function installButtonClick(event) {
 	const id = event.target.getAttribute("data-extension");
-	console.log("installButtonClick: ", id);
 	vscode.postMessage({
 		command: "install",
-		text: `intall ${id}`,
+		id: id,
 	});
 }
