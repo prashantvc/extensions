@@ -1,3 +1,7 @@
+**Update**
+Archiving this repository. Collaborating on https://github.com/timheuer/mymarketplace
+
+
 # Private Extension Repository
 
 This is a private repository for VS Code extensions, designed enterprises, or anyone who needs to manage their VS Code extensions in a controlled and secure environment. 
